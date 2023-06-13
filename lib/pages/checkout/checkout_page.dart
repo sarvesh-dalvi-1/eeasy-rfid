@@ -15,6 +15,18 @@ class CheckoutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    var checkoutProvider = Provider.of<CheckoutProvider>(context, listen: false);
+
+    int totalAmount = 0;
+
+    for(Product product in Provider.of<CheckoutProvider>(context, listen: false).products) {
+      totalAmount += (double.parse(product.discountedPrice) * 100).round();
+    }
+
+
+    paymentProcess(context, false, totalAmount);
+
     return SafeArea(
       child: Material(
         child: Column(
@@ -26,29 +38,29 @@ class CheckoutPage extends StatelessWidget {
                     Expanded(
                       flex: 1,
                       child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             const Text('Pay with Card/Contactless', style: TextStyle(color: Color(0xff000C38), fontSize: 20, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 30),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 15.0),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15.0),
                               child: Row(
                                 children: [
-                                  Text('Subtotal (3 Items)', style: TextStyle(fontSize: 18, color: Color(0xff6A7383), fontWeight: FontWeight.w500)),
-                                  Expanded(child: SizedBox()),
-                                  Text('AED 224.20', style: TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
+                                  Text('Subtotal (${checkoutProvider.products.length} Items)', style: const TextStyle(fontSize: 18, color: Color(0xff6A7383), fontWeight: FontWeight.w500)),
+                                  const Expanded(child: SizedBox()),
+                                  Text('AED $totalAmount', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
                                 ],
                               ),
                             ),
                             Container(width: double.infinity, height: 1, color: const Color(0xffD9D9D9)),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 15.0),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15.0),
                               child: Row(
                                 children: [
-                                  Column(
+                                  const Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -57,8 +69,8 @@ class CheckoutPage extends StatelessWidget {
                                       Text('including 5% VAT')
                                     ],
                                   ),
-                                  Expanded(child: SizedBox()),
-                                  Text('AED 254.20', style: TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
+                                  const Expanded(child: SizedBox()),
+                                  Text('AED ${totalAmount + (totalAmount * (5/100))}', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
                                 ],
                               ),
                             ),
@@ -100,16 +112,10 @@ class CheckoutPage extends StatelessWidget {
     );
   }
 
-  Future<Map<String, dynamic>> paymentProcess(BuildContext context, bool txnStatusToggle) async {
+  Future<Map<String, dynamic>> paymentProcess(BuildContext context, bool txnStatusToggle, int totalAmount) async {
 
     String respCode = '';
     String respMess = '';
-
-    int totalAmount = 0;
-
-    for(Product product in Provider.of<CheckoutProvider>(context, listen: false).products) {
-      totalAmount += (double.parse(product.price) * 100).round();
-    }
 
     var initResp = await Constants.methodChannel.invokeMethod('vfiInit', Provider.of<AppStateProvider>(context, listen: false).userSettings!.appToAppData?.toMap() as Map<String, String>);
     await Fluttertoast.showToast(msg: 'Init : ${initResp['VFI_RespCode']} : ${initResp['VFI_RespMess']}');

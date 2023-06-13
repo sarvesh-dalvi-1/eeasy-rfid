@@ -168,10 +168,9 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
     }
 
 
-    fun readTags() : Int {
+    private fun readTags(): Int {
         val connParam = "192.168.1.116:9090"
-        val ret = Tag6C.GetEPC(connParam, 1, eReadType.Inventory)
-        return ret
+        return Tag6C.GetEPC(connParam, 1, eReadType.Inventory)
     }
 
 

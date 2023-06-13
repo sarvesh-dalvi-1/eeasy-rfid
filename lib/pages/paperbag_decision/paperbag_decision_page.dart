@@ -76,7 +76,7 @@ class PaperbagDecisionPage extends StatelessWidget {
                                   children: [
                                     Icon(Icons.arrow_forward, size: 24),
                                     SizedBox(height: 10),
-                                    Text('No I will use my own bag', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))
+                                    Text('No, I will use my own bag', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))
                                   ],
                                 ),
                               )

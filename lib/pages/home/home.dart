@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Provider.of<RfidReadProvider>(context, listen: false).init();
+    Provider.of<RfidReadProvider>(context, listen: false).init(context);
 
     return SafeArea(
       child: Material(

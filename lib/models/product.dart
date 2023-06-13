@@ -3,11 +3,12 @@ class Product {
   String name;
   String imageUri;
   String price;
+  String discountedPrice;
   
-  Product({required this.name, required this.imageUri, required this.price});
+  Product({required this.name, required this.imageUri, required this.price, required this.discountedPrice});
   
   static Product fromMap(Map<String, dynamic> productMap) {
-    return Product(name: productMap['product_name'], imageUri: productMap['product_images'], price: productMap['product_discounted_price']);
+    return Product(name: productMap['product_name'], imageUri: productMap['product_images'], price: productMap['product_price'], discountedPrice: productMap['product_discounted_price']);
   }
 
   toMap() {

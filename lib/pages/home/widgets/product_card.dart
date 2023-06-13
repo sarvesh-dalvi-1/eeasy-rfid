@@ -72,7 +72,7 @@ class LoadedProductCard extends StatelessWidget {
           const SizedBox(width: 10),
           Text(product.name, style: const TextStyle(color: Color(0xff344054))),
           const Expanded(child: SizedBox()),
-          Text('AED ${product.price}', style: const TextStyle(fontWeight: FontWeight.w600))
+          Text('AED ${product.discountedPrice}', style: const TextStyle(fontWeight: FontWeight.w600))
         ],
       ),
     );

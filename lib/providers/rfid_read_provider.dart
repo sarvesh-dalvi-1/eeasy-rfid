@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 
 
 class RfidReadProvider extends ChangeNotifier {
@@ -10,7 +13,7 @@ class RfidReadProvider extends ChangeNotifier {
   List<String> tempTags = [];
   List<String> tags = [];
 
-  init() {
+  init(BuildContext context) {
     Timer.periodic(const Duration(seconds: 2), (timer) {
       final newTags = tags..sort();
       final newTempTags = tempTags..sort();
@@ -18,6 +21,7 @@ class RfidReadProvider extends ChangeNotifier {
       Fluttertoast.showToast(msg: 'Length : ${newTempTags.length}');
       if(!listEquals(newTags, newTempTags)) {
         tags = newTempTags.toList();
+        Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tags);
         notifyListeners();
       }
     });
