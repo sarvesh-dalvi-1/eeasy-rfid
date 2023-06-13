@@ -15,11 +15,13 @@ class PaymentSuccessfulPage extends StatelessWidget {
         child: Column(
           children: [
             const CAppbar(),
-            const Expanded(
+            Expanded(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Image.asset('assets/success.png'),
+                      const SizedBox(height: 20),
                       Text('Payment Successful', style: TextStyle(fontSize: 18, color: AppTheme.baseColor))
                     ],
                   ),
