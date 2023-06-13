@@ -157,11 +157,11 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
         println("NAME : $cName")
         rt = RFIDReader.CreateTcpConn(connParam, log)
         val dicPower = HashMap<Int, Int>()
-        /***dicPower[1] = 30
+        dicPower[1] = 30
         dicPower[2] = 30
         dicPower[3] = 30
         dicPower[4] = 30
-        RFIDReader._Config.SetANTPowerParam(connParam, dicPower)*/
+        RFIDReader._Config.SetANTPowerParam(connParam, dicPower)
         Toast.makeText(applicationContext, rt.toString(), Toast.LENGTH_SHORT).show()
         return rt
 
@@ -170,7 +170,7 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
     private fun readTags(): Int {
         val connParam = "192.168.1.116:9090"
-        return Tag6C.GetEPC(connParam, 1, eReadType.Inventory)
+        return Tag6C.GetEPC(connParam, 4, eReadType.Inventory)
     }
 
 

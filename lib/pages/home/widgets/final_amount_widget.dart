@@ -10,41 +10,40 @@ class FinalAmountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: const Color(0xffF2F2F7)
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      child: Consumer<CheckoutProvider>(
-        builder: (context, provider, child) {
-
+        width: MediaQuery.of(context).size.width,
+        decoration:
+            BoxDecoration(borderRadius: BorderRadius.circular(5), color: const Color(0xffF2F2F7)),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: Consumer<CheckoutProvider>(builder: (context, provider, child) {
           double amount = 0;
 
-          for(Product product in provider.products) {
+          for (Product product in provider.products) {
             amount += double.parse(product.discountedPrice);
           }
 
           return Row(
             children: [
-              Text.rich(TextSpan(
-                children: [
-                  TextSpan(text: provider.products.length.toString(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                  const TextSpan(text: ' Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff6A7383))),
-                ]
-              )),
+              Text.rich(TextSpan(children: [
+                TextSpan(
+                    text: provider.products.length.toString(),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const TextSpan(
+                    text: ' Items',
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff6A7383))),
+              ])),
               const Expanded(child: SizedBox()),
-              Text.rich(TextSpan(
-                  children: [
-                    const TextSpan(text: 'Total', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff6A7383))),
-                    TextSpan(text: ' AED $amount', style: const  TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                  ]
-              ))
+              Text.rich(TextSpan(children: [
+                const TextSpan(
+                    text: 'Total',
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff6A7383))),
+                TextSpan(
+                    text: ' AED $amount',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              ]))
             ],
           );
-        }
-      )
-    );
+        }));
   }
 }
-

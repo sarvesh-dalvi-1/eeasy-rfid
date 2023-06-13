@@ -7,9 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
-
 class RfidReadProvider extends ChangeNotifier {
-
   List<String> tempTags = [];
   List<String> tags = [];
 
@@ -19,22 +17,23 @@ class RfidReadProvider extends ChangeNotifier {
       final newTempTags = tempTags..sort();
       tempTags = [];
       Fluttertoast.showToast(msg: 'Length : ${newTempTags.length}');
-      if(!listEquals(newTags, newTempTags)) {
+      if (!listEquals(newTags, newTempTags)) {
         tags = newTempTags.toList();
-        Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tags);
+        Provider.of<CheckoutProvider>(context, listen: false)
+            .populateCheckoutProductsFromTags(tags);
         notifyListeners();
       }
     });
     Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
-      Fluttertoast.showToast(msg: 'Received event : $event');
-      if(((event as String).length == 24) && (!tempTags.contains(event))) {
-          tempTags.add(event);
+      // Fluttertoast.showToast(msg: 'Received event : $event');
+      if (((event as String).length == 24) && (!tempTags.contains(event))) {
+        tempTags.add(event);
       }
     });
     Constants.methodChannel.invokeMethod('readTags').then((value) {
       Fluttertoast.showToast(msg: 'Read tags Init : $value');
     });
-     /* Timer.periodic(const Duration(seconds: 3), (timer) {
+    /* Timer.periodic(const Duration(seconds: 3), (timer) {
         tags = [];
       });
     Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
@@ -47,5 +46,4 @@ class RfidReadProvider extends ChangeNotifier {
       }
     }); */
   }
-
 }
