@@ -143,7 +143,7 @@ class CheckoutPage extends StatelessWidget {
       };
     }
 
-    Provider.of<AppStateProvider>(context, listen: false).userSettings = UserSettingsModel.fromMap(jsonDecode(resp.body));
+    Provider.of<AppStateProvider>(context, listen: false).userSettings = UserSettingsModel.fromMap(jsonDecode(resp.body)['data']);
 
     var initResp = await Constants.methodChannel.invokeMethod('vfiInit', Provider.of<AppStateProvider>(context, listen: false).userSettings!.appToAppData?.toMap() as Map<String, String>);
     await Fluttertoast.showToast(msg: 'Init : ${initResp['VFI_RespCode']} : ${initResp['VFI_RespMess']}');
