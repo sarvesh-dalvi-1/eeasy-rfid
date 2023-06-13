@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:eeasy_rfid/Models/user_settings.dart';
 import 'package:eeasy_rfid/api_collection/eeasy_rfid_api.dart';
 import 'package:eeasy_rfid/models/product.dart';
+import 'package:eeasy_rfid/pages/payment_successful/payment_successful_page.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
 import 'package:eeasy_rfid/util/data.dart';
@@ -28,8 +29,19 @@ class CheckoutPage extends StatelessWidget {
       totalAmount += (double.parse(product.discountedPrice) * 100).round();
     }
 
+    Future.delayed(const Duration(seconds: 1)).then((value) {
+      paymentProcess(context, false, totalAmount).then((res) {
+        if(res['error'] == true) {
+          Fluttertoast.showToast(msg: 'Error : ${res['code']} : ${res['message']}');
+        }
+        else {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentSuccessfulPage()));
+        }
+      });
+    });
 
-    paymentProcess(context, false, totalAmount);
+
+
 
     return SafeArea(
       child: Material(
