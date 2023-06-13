@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:eeasy_rfid/Models/user_settings.dart';
+import 'package:eeasy_rfid/api_collection/eeasy_rfid_api.dart';
 import 'package:eeasy_rfid/models/product.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
@@ -116,6 +120,18 @@ class CheckoutPage extends StatelessWidget {
 
     String respCode = '';
     String respMess = '';
+
+    var resp = await RfidAPICollection.getUserSettings();
+
+    if(resp.statusCode != 200) {
+      return {
+        'error' : true,
+        'code' : 0,
+        'message' : 'Unable to fetch user settings'
+      };
+    }
+
+    Provider.of<AppStateProvider>(context, listen: false).userSettings = UserSettingsModel.fromMap(jsonDecode(resp.body));
 
     var initResp = await Constants.methodChannel.invokeMethod('vfiInit', Provider.of<AppStateProvider>(context, listen: false).userSettings!.appToAppData?.toMap() as Map<String, String>);
     await Fluttertoast.showToast(msg: 'Init : ${initResp['VFI_RespCode']} : ${initResp['VFI_RespMess']}');

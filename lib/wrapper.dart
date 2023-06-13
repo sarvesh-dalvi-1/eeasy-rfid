@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:eeasy_rfid/pages/error.dart';
 import 'package:eeasy_rfid/pages/home/home.dart';
-import 'package:eeasy_rfid/pages/login/login.dart';
 import 'package:eeasy_rfid/pages/splash.dart';
 import 'package:eeasy_rfid/providers/rfid_init_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';

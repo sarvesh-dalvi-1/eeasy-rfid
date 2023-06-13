@@ -39,7 +39,6 @@ dependencies:
   http: ^1.0.0
   fluttertoast: ^8.2.2
   shimmer: ^3.0.0
-  shared_preferences: ^2.1.2
   package_info_plus: ^4.0.2
   unique_identifier: ^0.3.0
   barcode: ^2.2.4

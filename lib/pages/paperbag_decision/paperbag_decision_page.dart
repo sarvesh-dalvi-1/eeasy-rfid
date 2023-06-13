@@ -38,7 +38,7 @@ class PaperbagDecisionPage extends StatelessWidget {
                           InkWell(
                             onTap: () { },
                             child: Container(
-                                width: 250, height: 150,
+                                width: 270, height: 170,
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
@@ -63,7 +63,7 @@ class PaperbagDecisionPage extends StatelessWidget {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutPage()));
                             },
                             child: Container(
-                              width: 250, height: 150,
+                              width: 270, height: 170,
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),

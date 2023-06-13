@@ -1,9 +1,7 @@
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
-import 'package:eeasy_rfid/providers/login_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_init_provider.dart';
-import 'package:eeasy_rfid/providers/session_provider.dart';
 import 'package:eeasy_rfid/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +21,6 @@ void main() async {
             ChangeNotifierProvider<RfidReadProvider>(create: (_) => RfidReadProvider()),
             ChangeNotifierProvider<AppStateProvider>(create: (_) => AppStateProvider()),
             ChangeNotifierProvider<CheckoutProvider>(create: (_) => CheckoutProvider()),
-            ChangeNotifierProvider<LoginProvider>(create: (_) => LoginProvider()),
-            ChangeNotifierProvider<SessionProvider>(create: (_) => SessionProvider()),
           ],
           child: const MyApp()
       )
