@@ -16,7 +16,7 @@ class RfidReadProvider extends ChangeNotifier {
       final newTags = tags..sort();
       final newTempTags = tempTags..sort();
       tempTags = [];
-      Fluttertoast.showToast(msg: 'Length : ${newTempTags.length}');
+      //Fluttertoast.showToast(msg: 'Length : ${newTempTags.length}');
       if (!listEquals(newTags, newTempTags)) {
         tags = newTempTags.toList();
         Provider.of<CheckoutProvider>(context, listen: false)

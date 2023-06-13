@@ -89,7 +89,7 @@ class PaperbagDecisionPage extends StatelessWidget {
                   ),
                 )
             ),
-            CBottomBar(hasPrimary: true, primaryText: 'Continue', onPrimaryTap: () => showDialog(context: context, builder: (_) => const SizedBox()))
+            CBottomBar(hasPrimary: false, primaryText: 'Continue', onPrimaryTap: () => showDialog(context: context, builder: (_) => const SizedBox()))
           ],
         ),
       ),

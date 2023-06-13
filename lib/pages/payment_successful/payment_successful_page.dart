@@ -1,4 +1,5 @@
 import 'package:eeasy_rfid/util/theme.dart';
+import 'package:eeasy_rfid/wrapper.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/appbar.dart';
@@ -18,11 +19,17 @@ class PaymentSuccessfulPage extends StatelessWidget {
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [Text('Payment Successful', style: TextStyle(fontSize: 18, color: AppTheme.baseColor))],
+                    children: [
+                      Text('Payment Successful', style: TextStyle(fontSize: 18, color: AppTheme.baseColor))
+                    ],
                   ),
                 )
             ),
-            CBottomBar(hasSecondary: true, secondaryText: 'Close Session', onPrimaryTap: () => showDialog(context: context, builder: (_) => const SizedBox()))
+            CBottomBar(hasSecondary: true, secondaryText: 'Done', onSecondaryTap: () {
+              for(int i=0; i<3; i++) {
+                Navigator.pop(context);
+              }
+            })
           ],
         ),
       ),
