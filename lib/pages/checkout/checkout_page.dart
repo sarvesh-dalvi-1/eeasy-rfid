@@ -24,9 +24,11 @@ class CheckoutPage extends StatelessWidget {
     var checkoutProvider = Provider.of<CheckoutProvider>(context, listen: false);
 
     int totalAmount = 0;
+    double totalAmountDisplay = 0;
 
     for(Product product in Provider.of<CheckoutProvider>(context, listen: false).products) {
       totalAmount += (double.parse(product.discountedPrice) * 100).round();
+      totalAmountDisplay += double.parse(product.discountedPrice);
     }
 
     Future.delayed(const Duration(seconds: 1)).then((value) {
@@ -67,7 +69,7 @@ class CheckoutPage extends StatelessWidget {
                                 children: [
                                   Text('Subtotal (${checkoutProvider.products.length} Items)', style: const TextStyle(fontSize: 18, color: Color(0xff6A7383), fontWeight: FontWeight.w500)),
                                   const Expanded(child: SizedBox()),
-                                  Text('AED $totalAmount', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
+                                  Text('AED ${totalAmountDisplay.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
                                 ],
                               ),
                             ),
@@ -86,7 +88,7 @@ class CheckoutPage extends StatelessWidget {
                                     ],
                                   ),
                                   const Expanded(child: SizedBox()),
-                                  Text('AED ${totalAmount + (totalAmount * (5/100))}', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
+                                  Text('AED ${(totalAmountDisplay + (totalAmountDisplay * (5/100))).toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, color: Color(0xff30313D), fontWeight: FontWeight.w600))
                                 ],
                               ),
                             ),

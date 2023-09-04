@@ -19,7 +19,7 @@ class CheckoutProvider extends ChangeNotifier {
           Data.epcProductMap.addAll({tag: resp.data!});
           products.add(resp.data!);
         } else {
-          Fluttertoast.showToast(msg: '$tag : ${resp.statusCode} : ${resp.reasonPhrase}');
+          ///Fluttertoast.showToast(msg: '$tag : ${resp.statusCode} : ${resp.reasonPhrase}');
         }
       }
     }

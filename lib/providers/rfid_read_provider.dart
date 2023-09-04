@@ -31,7 +31,7 @@ class RfidReadProvider extends ChangeNotifier {
       }
     });
     Constants.methodChannel.invokeMethod('readTags').then((value) {
-      Fluttertoast.showToast(msg: 'Read tags Init : $value');
+      Fluttertoast.showToast(msg: 'Read tags Init : $value');         /// 0 : success     eslse : error
     });
     /* Timer.periodic(const Duration(seconds: 3), (timer) {
         tags = [];

@@ -1,9 +1,13 @@
+import 'package:eeasy_rfid/pages/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 
 import 'clock.dart';
 
 class CAppbar extends StatelessWidget {
-  const CAppbar({Key? key}) : super(key: key);
+
+  final bool hasSettingsButton;
+
+  const CAppbar({Key? key, this.hasSettingsButton = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +19,14 @@ class CAppbar extends StatelessWidget {
         children: [
           Image.asset('assets/eeasy_logo.png', height: 40),
           const Expanded(child: SizedBox()),
-          const ClockWidget()
+          const ClockWidget(),
+          hasSettingsButton ? const SizedBox(width: 20) : const SizedBox(),
+          hasSettingsButton ? InkWell(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+              },
+              child: const Icon(Icons.settings)
+          ) : const SizedBox(),
         ],
       ),
     );

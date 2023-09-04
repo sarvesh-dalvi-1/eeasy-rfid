@@ -5,6 +5,7 @@ import android.hardware.usb.UsbManager
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
+import android.view.Gravity
 import android.widget.Toast
 import com.MFG.eeasyMagnati.EcrToPos
 import com.MFG.eeasyusbserial.ConfigData
@@ -24,20 +25,28 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.FileNotFoundException
 import java.util.*
+import kotlin.math.max
 
 
-class MainActivity: IAsynchronousMessage, FlutterActivity() {
+open class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
     private val METHOD_CHANNEL = "com.example.eeasy_rfid/method"
     private val EVENT_CHANNEL = "com.example.eeasy_rfid/event"
     private  val TAGS_EVENT_CHANNEL = "com.example.eeasy_rfid/event/tags"
+
+    val connParam = "192.168.1.116:9090"
 
     var TerminalInterface : EcrToPos = EcrToPos()
 
     var eventSink: EventChannel.EventSink? = null
     var tagsEventSink: EventChannel.EventSink? = null
 
-    var enabledAntenna : Int = 4
+    var enabledAntennas : Int = 0
+
+    var minPower : Int = 0
+    var maxPower : Int = 0
+
+    val antennaValueMap : HashMap<Int, Int> = hashMapOf(1 to 1, 2 to 2, 3 to 4, 4 to 8, 5 to 16, 6 to 32, 7 to 64, 8 to 128)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -176,6 +185,26 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     temp["VFI_SDKVER"] = TerminalInterface.VFI_SDKVER
                     result.success(temp)
                 }
+                else if(call.method == "setAntenna") {
+                    val toast = Toast.makeText(applicationContext, "Set antenna to : ${call.argument<List<Int>>("antennas")!!}", Toast.LENGTH_SHORT)
+                    toast.setGravity(Gravity.CENTER, 0, 0)
+                    toast.show()
+                    result.success(setAntenna(call.argument<List<Int>>("antennas")!!))
+                }
+                else if(call.method == "setPower") {
+                    result.success(setPower(call.argument<HashMap<Int, Int>>("powerMap")!!))
+                }
+                else if(call.method == "setInitValues") {
+                    val temp: MutableMap<String, Int> = HashMap()
+                    UHF_SetReaderProperty()
+                    val toast2 = Toast.makeText(applicationContext, "setup res  : ${enabledAntennas}", Toast.LENGTH_SHORT)
+                    toast2.setGravity(Gravity.CENTER, 0, 0)
+                    toast2.show()
+                    temp["antennaValue"] = enabledAntennas
+                    temp["minPower"] = minPower
+                    temp["maxPower"] = maxPower
+                    result.success(temp)
+                }
                 else {
                     result.notImplemented()
                 }
@@ -183,58 +212,6 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
     }
 
-
-    /*override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-
-        super.configureFlutterEngine(flutterEngine)
-        println("Hello wolrd")
-        Log.d("fabiola", "CONFIG FLUTTER ENGINE !!!")
-        Log.d("fabiola", "SETTING EVENT CHANNEL")
-        val policy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        EventChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            EVENT_CHANNEL
-        ).setStreamHandler(
-            object : EventChannel.StreamHandler {
-                override fun onListen(args: Any?, events: EventChannel.EventSink) {
-                    Log.d("fabiola", "LISTENED ON ANDROID!!!")
-                    eventSink = events
-                }
-
-                override fun onCancel(args: Any?) {}
-            }
-        )
-        EventChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            TAGS_EVENT_CHANNEL
-        ).setStreamHandler(
-            object : EventChannel.StreamHandler {
-                override fun onListen(args: Any?, events: EventChannel.EventSink) {
-                    Log.d("fabiola", "LISTENED ON TAGS EVENT!!!")
-                    tagsEventSink = events
-                }
-
-                override fun onCancel(args: Any?) {}
-            }
-        )
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL)
-            .setMethodCallHandler { call, result ->
-                if (call.method.equals("connectTCP")) {
-                    result.success(connectTcp())
-                }
-                else if(call.method.equals("connectUSB")) {
-                    result.success(connectUSB(this))
-                }
-                else if(call.method.equals("readTags")) {
-                    result.success(readTags())
-                }
-                else {
-                    result.notImplemented()
-                }
-            }
-
-    } */
 
     private fun connectTcp() : Boolean {
         //if(count == 0) {
@@ -266,15 +243,57 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
         dicPower[3] = 30
         dicPower[4] = 30
         RFIDReader._Config.SetANTPowerParam(connParam, dicPower)
-        Toast.makeText(applicationContext, rt.toString(), Toast.LENGTH_SHORT).show()
         return rt
 
     }
 
 
     private fun readTags(): Int {
-        val connParam = "192.168.1.116:9090"
-        return Tag6C.GetEPC(connParam, 4, eReadType.Inventory)
+        return Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
+    }
+
+    private fun setAntenna(selectedAntennas : List<Int>) : Int {
+        enabledAntennas = 0
+        for (antennaNo in selectedAntennas) {
+            enabledAntennas += antennaValueMap[antennaNo]!!
+        }
+        val toast = Toast.makeText(applicationContext, "antenna value : ${enabledAntennas}", Toast.LENGTH_SHORT)
+        toast.setGravity(Gravity.CENTER, 0, 0)
+        toast.show()
+        var x = RFIDReader._Config.Stop(connParam)
+        val toast1 = Toast.makeText(applicationContext, "stop res  : ${x}", Toast.LENGTH_SHORT)
+        toast1.setGravity(Gravity.CENTER, 0, 0)
+        toast1.show()
+        var y = Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
+        val toast2 = Toast.makeText(applicationContext, "start res  : ${y}", Toast.LENGTH_SHORT)
+        toast2.setGravity(Gravity.CENTER, 0, 0)
+        toast2.show()
+        return 1
+    }
+
+
+    private fun setPower(powerMap : HashMap<Int, Int>) : Int {
+        //val dicPower = HashMap<Int, Int>()
+        //dicPower[1] = 30
+        //dicPower[2] = 30
+        //dicPower[3] = 30
+        //dicPower[4] = 30
+        //val toast2 = Toast.makeText(applicationContext, "start res  : ${y}", Toast.LENGTH_SHORT)
+        //toast2.setGravity(Gravity.CENTER, 0, 0)
+        //toast2.show()
+        var y = RFIDReader._Config.Stop(connParam)
+        val toast1 = Toast.makeText(applicationContext, "setpow stop res  : ${y}", Toast.LENGTH_SHORT)
+        toast1.setGravity(Gravity.CENTER, 0, 0)
+        toast1.show()
+        val x = RFIDReader._Config.SetANTPowerParam(connParam, powerMap)
+        val toast2 = Toast.makeText(applicationContext, "power change res  : ${x}", Toast.LENGTH_SHORT)
+        toast2.setGravity(Gravity.CENTER, 0, 0)
+        toast2.show()
+        var z = Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
+        val toast3 = Toast.makeText(applicationContext, "setpow start res  : ${z}", Toast.LENGTH_SHORT)
+        toast3.setGravity(Gravity.CENTER, 0, 0)
+        toast3.show()
+        return x
     }
 
     fun VFIInit(methodCall: MethodCall) {
@@ -336,6 +355,21 @@ class MainActivity: IAsynchronousMessage, FlutterActivity() {
         TerminalInterface.VFI_GetAuth()
     }
 
+    fun UHF_SetReaderProperty() {
+        val propertyStr = RFIDReader.GetReaderProperty(connParam)
+        val propertyArr = propertyStr.split("\\|".toRegex()).toTypedArray()
+        if (propertyArr.size > 3) {
+            try {
+                minPower = propertyArr[0].toInt()
+                maxPower = propertyArr[1].toInt()
+                enabledAntennas = propertyArr[2].toInt()
+            } catch (ex: Exception) {
+                Log.d("Debug", "Get Reader Property failure and conversion failed!")
+            }
+        } else {
+            Log.d("Debug", "Get Reader Property failure")
+        }
+    }
 
     private fun connectUSB(log: IAsynchronousMessage) : String {
 

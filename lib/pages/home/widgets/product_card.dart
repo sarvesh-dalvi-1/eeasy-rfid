@@ -36,7 +36,7 @@ class _ProductCardState extends State<ProductCard> {
           }
         }
         else {
-          Fluttertoast.showToast(msg: '${widget.epc} : ${value.statusCode} : ${value.reasonPhrase}');
+          ///Fluttertoast.showToast(msg: '${widget.epc} : ${value.statusCode} : ${value.reasonPhrase}');
         }
       });
     }
@@ -72,7 +72,7 @@ class LoadedProductCard extends StatelessWidget {
           const SizedBox(width: 10),
           Text(product.name, style: const TextStyle(color: Color(0xff344054))),
           const Expanded(child: SizedBox()),
-          Text('AED ${product.discountedPrice}', style: const TextStyle(fontWeight: FontWeight.w600))
+          Text('AED ${double.parse(product.discountedPrice).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600))
         ],
       ),
     );

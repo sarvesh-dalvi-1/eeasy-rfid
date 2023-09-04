@@ -39,7 +39,7 @@ class FinalAmountWidget extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xff6A7383))),
                 TextSpan(
-                    text: ' AED $amount',
+                    text: ' AED ${amount.toStringAsFixed(2)}',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
               ]))
             ],

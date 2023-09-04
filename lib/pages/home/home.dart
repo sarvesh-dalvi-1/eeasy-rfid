@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
       child: Material(
         child: Column(
           children: [
-            const CAppbar(),
+            const CAppbar(hasSettingsButton: true),
             Expanded(
                 child: Stack(
                   alignment: Alignment.bottomCenter,
