@@ -12,6 +12,14 @@ class RfidReadProvider extends ChangeNotifier {
   List<String> tags = [];
 
   init(BuildContext context) {
+
+    Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
+      // Fluttertoast.showToast(msg: 'Received event : $event');
+      if (((event as String).length == 24) && (!tempTags.contains(event))) {
+        tempTags.add(event);
+      }
+    });
+
     Timer.periodic(const Duration(seconds: 2), (timer) {
       final newTags = tags..sort();
       final newTempTags = tempTags..sort();
@@ -22,12 +30,6 @@ class RfidReadProvider extends ChangeNotifier {
         Provider.of<CheckoutProvider>(context, listen: false)
             .populateCheckoutProductsFromTags(tags);
         notifyListeners();
-      }
-    });
-    Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
-      // Fluttertoast.showToast(msg: 'Received event : $event');
-      if (((event as String).length == 24) && (!tempTags.contains(event))) {
-        tempTags.add(event);
       }
     });
     Constants.methodChannel.invokeMethod('readTags').then((value) {
