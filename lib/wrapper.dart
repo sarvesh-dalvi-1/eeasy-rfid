@@ -21,9 +21,7 @@ class Wrapper extends StatelessWidget {
     });
 
     Provider.of<RfidInitProvider>(context, listen: false).connectTcp().then((val) {
-      Future.delayed(const Duration(seconds: 2)).then((value) {
-        Provider.of<SettingsProvider>(context, listen: false).setInitValues();
-      });
+      Provider.of<SettingsProvider>(context, listen: false).setInitValues(context);
     });
 
     return SizedBox(

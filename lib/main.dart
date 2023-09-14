@@ -1,3 +1,4 @@
+import 'package:eeasy_rfid/pages/settings/providers/settings_logs_provider.dart';
 import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
@@ -6,7 +7,10 @@ import 'package:eeasy_rfid/providers/rfid_init_provider.dart';
 import 'package:eeasy_rfid/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
+
 
 void main() async {
 
@@ -15,6 +19,10 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+
+  await Hive.initFlutter();
+  await Hive.openBox('logs');
+
   runApp(
       MultiProvider(
           providers: [

@@ -1,6 +1,7 @@
 package com.example.eeasy_rfid
 
 
+import android.annotation.SuppressLint
 import android.hardware.usb.UsbManager
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
@@ -25,7 +26,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.FileNotFoundException
 import java.util.*
-import kotlin.math.max
 
 
 open class MainActivity: IAsynchronousMessage, FlutterActivity() {
@@ -188,7 +188,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                 else if(call.method == "setAntenna") {
                     val toast = Toast.makeText(applicationContext, "Set antenna to : ${call.argument<List<Int>>("antennas")!!}", Toast.LENGTH_SHORT)
                     toast.setGravity(Gravity.CENTER, 0, 0)
-                    toast.show()
+                    //toast.show()
                     result.success(setAntenna(call.argument<List<Int>>("antennas")!!))
                 }
                 else if(call.method == "setPower") {
@@ -199,7 +199,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     UHF_SetReaderProperty()
                     val toast2 = Toast.makeText(applicationContext, "setup res  : ${enabledAntennas}", Toast.LENGTH_SHORT)
                     toast2.setGravity(Gravity.CENTER, 0, 0)
-                    toast2.show()
+                    //toast2.show()
                     temp["antennaValue"] = enabledAntennas
                     temp["minPower"] = minPower
                     temp["maxPower"] = maxPower
@@ -259,15 +259,15 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         }
         val toast = Toast.makeText(applicationContext, "antenna value : ${enabledAntennas}", Toast.LENGTH_SHORT)
         toast.setGravity(Gravity.CENTER, 0, 0)
-        toast.show()
+        //toast.show()
         var x = RFIDReader._Config.Stop(connParam)
         val toast1 = Toast.makeText(applicationContext, "stop res  : ${x}", Toast.LENGTH_SHORT)
         toast1.setGravity(Gravity.CENTER, 0, 0)
-        toast1.show()
+       // toast1.show()
         var y = Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
         val toast2 = Toast.makeText(applicationContext, "start res  : ${y}", Toast.LENGTH_SHORT)
         toast2.setGravity(Gravity.CENTER, 0, 0)
-        toast2.show()
+        //toast2.show()
         return 1
     }
 
@@ -284,15 +284,15 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         var y = RFIDReader._Config.Stop(connParam)
         val toast1 = Toast.makeText(applicationContext, "setpow stop res  : ${y}", Toast.LENGTH_SHORT)
         toast1.setGravity(Gravity.CENTER, 0, 0)
-        toast1.show()
+        //toast1.show()
         val x = RFIDReader._Config.SetANTPowerParam(connParam, powerMap)
         val toast2 = Toast.makeText(applicationContext, "power change res  : ${x}", Toast.LENGTH_SHORT)
         toast2.setGravity(Gravity.CENTER, 0, 0)
-        toast2.show()
+       // toast2.show()
         var z = Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
         val toast3 = Toast.makeText(applicationContext, "setpow start res  : ${z}", Toast.LENGTH_SHORT)
         toast3.setGravity(Gravity.CENTER, 0, 0)
-        toast3.show()
+        //toast3.show()
         return x
     }
 
@@ -355,9 +355,16 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         TerminalInterface.VFI_GetAuth()
     }
 
+
     fun UHF_SetReaderProperty() {
+        //val toast = Toast.makeText(applicationContext, "Test toast", Toast.LENGTH_SHORT)
+        //toast.setGravity(Gravity.CENTER, 0, 0)
+        //toast.show()
         val propertyStr = RFIDReader.GetReaderProperty(connParam)
         val propertyArr = propertyStr.split("\\|".toRegex()).toTypedArray()
+        val toast1 = Toast.makeText(applicationContext, "Set reader property  : $propertyStr", Toast.LENGTH_SHORT)
+        toast1.setGravity(Gravity.CENTER, 0, 0)
+        //toast1.show()
         if (propertyArr.size > 3) {
             try {
                 minPower = propertyArr[0].toInt()

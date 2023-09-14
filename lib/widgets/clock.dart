@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ClockWidget extends StatefulWidget {
   const ClockWidget({Key? key}) : super(key: key);
@@ -10,6 +11,8 @@ class ClockWidget extends StatefulWidget {
 }
 
 class _ClockWidgetState extends State<ClockWidget> {
+
+  NumberFormat formatter = NumberFormat("00");
 
   @override
   void initState() {
@@ -24,6 +27,6 @@ class _ClockWidgetState extends State<ClockWidget> {
   @override
   Widget build(BuildContext context) {
     DateTime dateTime = DateTime.now();
-    return Text('${dateTime.hour} : ${dateTime.minute}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20));
+    return Text('${formatter.format(dateTime.hour)} : ${formatter.format(dateTime.minute)}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20));
   }
 }

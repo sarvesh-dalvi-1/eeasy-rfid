@@ -11,41 +11,56 @@ class RfidReadProvider extends ChangeNotifier {
   List<String> tempTags = [];
   List<String> tags = [];
 
+  List<List<String>> listOfList = [];
+  List<String> finalList = [];
+
+  int tagsScanned = 0;
+
+  bool isInverseLogic = false;
+
   init(BuildContext context) {
 
     Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
-      // Fluttertoast.showToast(msg: 'Received event : $event');
       if (((event as String).length == 24) && (!tempTags.contains(event))) {
         tempTags.add(event);
       }
     });
 
-    Timer.periodic(const Duration(seconds: 2), (timer) {
-      final newTags = tags..sort();
-      final newTempTags = tempTags..sort();
-      tempTags = [];
-      //Fluttertoast.showToast(msg: 'Length : ${newTempTags.length}');
-      if (!listEquals(newTags, newTempTags)) {
-        tags = newTempTags.toList();
-        Provider.of<CheckoutProvider>(context, listen: false)
-            .populateCheckoutProductsFromTags(tags);
-        notifyListeners();
-      }
-    });
     Constants.methodChannel.invokeMethod('readTags').then((value) {
-      Fluttertoast.showToast(msg: 'Read tags Init : $value');         /// 0 : success     eslse : error
+      //Fluttertoast.showToast(msg: 'Read tags Init : $value');         /// 0 : success     eslse : error
     });
-    /* Timer.periodic(const Duration(seconds: 3), (timer) {
-        tags = [];
-      });
-    Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
-      if((event as String).length == 24) {
-        if(!tags.contains(event)) {
-          tags.add(event);
-          tags.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
-          notifyListeners();
+
+
+
+    Timer.periodic(const Duration(seconds: 2), (_) {
+      tagsScanned = tempTags.length;
+      //Fluttertoast.showToast(msg: 'Temp tags : ${tempTags.length}');
+      listOfList.add(tempTags);
+      if(listOfList.length > 3) {
+        listOfList.removeAt(0);
+      }
+      for(int i=0;i<listOfList.length; i++) {
+        for(int j=0; j<listOfList[i].length; j++) {
+          if(!finalList.contains(listOfList[i][j])) {
+            finalList.add(listOfList[i][j]);
+          }
         }
       }
-    }); */
+      if(!listEquals(finalList..sort(), tags..sort())) {
+        //Fluttertoast.showToast(msg: 'List updated !!!');
+        tags = finalList.toList();
+        Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tags);
+        //notifyListeners();
+      }
+      notifyListeners();
+      tempTags = [];
+      finalList = [];
+    });
   }
+
+
+  setIsInverseLogic(bool isInverseLogic) {
+    this.isInverseLogic = isInverseLogic;
+  }
+
 }
