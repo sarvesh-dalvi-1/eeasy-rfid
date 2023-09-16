@@ -2,6 +2,7 @@ import 'package:eeasy_rfid/pages/settings/providers/settings_logs_provider.dart'
 import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
+import 'package:eeasy_rfid/providers/door_status_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_init_provider.dart';
 import 'package:eeasy_rfid/wrapper.dart';
@@ -31,6 +32,7 @@ void main() async {
             ChangeNotifierProvider<AppStateProvider>(create: (_) => AppStateProvider()),
             ChangeNotifierProvider<CheckoutProvider>(create: (_) => CheckoutProvider()),
             ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
+            ChangeNotifierProvider<DoorStatusProvider>(create: (_) => DoorStatusProvider())
           ],
           child: const MyApp()
       )

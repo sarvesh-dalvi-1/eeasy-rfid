@@ -1,22 +1,25 @@
 import 'dart:async';
 
+import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 class RfidReadProvider extends ChangeNotifier {
   List<String> tempTags = [];
-  List<String> tags = [];
 
   List<List<String>> listOfList = [];
   List<String> finalList = [];
 
-  int tagsScanned = 0;
 
-  bool isInverseLogic = false;
+  List<String> recordedTags = [];    /// Display when recording mode is on
+  List<String> tagsRemoved = [];     /// This will store all the tags that are removed after recording
+  List<String> finalRecordedTags = [];    /// Store the final recorded data here
+
+
+  int tagsScanned = 0;
 
   init(BuildContext context) {
 
@@ -30,9 +33,8 @@ class RfidReadProvider extends ChangeNotifier {
       //Fluttertoast.showToast(msg: 'Read tags Init : $value');         /// 0 : success     eslse : error
     });
 
-
-
     Timer.periodic(const Duration(seconds: 2), (_) {
+
       tagsScanned = tempTags.length;
       //Fluttertoast.showToast(msg: 'Temp tags : ${tempTags.length}');
       listOfList.add(tempTags);
@@ -46,21 +48,39 @@ class RfidReadProvider extends ChangeNotifier {
           }
         }
       }
-      if(!listEquals(finalList..sort(), tags..sort())) {
+      if(!listEquals(finalList..sort(), recordedTags..sort())) {
         //Fluttertoast.showToast(msg: 'List updated !!!');
-        tags = finalList.toList();
-        Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tags);
+        recordedTags = finalList.toList();
         //notifyListeners();
       }
+
+      tagsRemoved = [];
+
+      for(int i=0;i<finalRecordedTags.length;i++) {
+        if(!recordedTags.contains(finalRecordedTags[i])) {
+          tagsRemoved.add(finalRecordedTags[i]);
+        }
+      }
+
+      Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tagsRemoved);
+
+
+      if(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn) {
+        finalRecordedTags = recordedTags.toList();
+        notifyListeners();
+      }
+
       notifyListeners();
+
       tempTags = [];
       finalList = [];
     });
   }
 
 
-  setIsInverseLogic(bool isInverseLogic) {
-    this.isInverseLogic = isInverseLogic;
+  populateFinalRecTags() {
+    finalRecordedTags = recordedTags.toList();
+    notifyListeners();
   }
 
 }

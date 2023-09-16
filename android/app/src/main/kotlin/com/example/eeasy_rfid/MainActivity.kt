@@ -1,7 +1,6 @@
 package com.example.eeasy_rfid
 
 
-import android.annotation.SuppressLint
 import android.hardware.usb.UsbManager
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
@@ -11,6 +10,7 @@ import android.widget.Toast
 import com.MFG.eeasyMagnati.EcrToPos
 import com.MFG.eeasyusbserial.ConfigData
 import com.MFG.eeasyusbserial.ConfigLoader
+import com.eeasy.doorlibrary.EcrToArudino
 import com.example.rfid_mvp_final.PublicData
 import com.rfidread.Enumeration.eReadType
 import com.rfidread.Interface.IAsynchronousMessage
@@ -204,6 +204,15 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     temp["minPower"] = minPower
                     temp["maxPower"] = maxPower
                     result.success(temp)
+                }
+                else if(call.method == "openDoor") {
+                    result.success(EcrToArudino.OpenDoor())
+                }
+                else if(call.method == "closeDoor") {
+                    result.success(EcrToArudino.CloseDoor())
+                }
+                else if(call.method == "doorStatus") {
+                    result.success(EcrToArudino.DoorSensorStatus())
                 }
                 else {
                     result.notImplemented()

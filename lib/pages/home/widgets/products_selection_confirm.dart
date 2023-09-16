@@ -27,7 +27,7 @@ class ProductsSelectionConfirmWidget extends StatelessWidget {
                 Text.rich(
                     TextSpan(
                         children: [
-                          TextSpan(text: Provider.of<RfidReadProvider>(context).tags.length.toString(), style: const TextStyle(color: Color(0xff30313D), fontSize: 22)),
+                          TextSpan(text: Provider.of<RfidReadProvider>(context).recordedTags.length.toString(), style: const TextStyle(color: Color(0xff30313D), fontSize: 22)),
                           const TextSpan(text: ' Items', style: TextStyle(color: Color(0xff30313D), fontSize: 22)),
                         ]
                     )

@@ -34,7 +34,7 @@ class Wrapper extends StatelessWidget {
               return provider.isTcpConnected == null ? const SplashPage() : (provider.isTcpConnected == true ? Provider.of<SettingsProvider>(context).initValuesSet ? const HomePage() : const Material(color: Colors.white, child: Center(child: SizedBox(width: 30, child: CircularProgressIndicator()))) : const ErrorPage());
             }
           ),
-          Align(
+          /*Align(
             alignment: Alignment.topRight,
             child: Container(
               padding: const EdgeInsets.only(top: 55, right: 50),
@@ -43,7 +43,7 @@ class Wrapper extends StatelessWidget {
                 location: BannerLocation.bottomStart,
               ),
             ),
-          ),
+          ), */
         ],
       ),
     );

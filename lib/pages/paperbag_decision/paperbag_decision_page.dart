@@ -59,7 +59,7 @@ class PaperbagDecisionPage extends StatelessWidget {
                           const SizedBox(width: 15),
                           InkWell(
                             onTap: () async {
-                              Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).tags);
+                              Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).recordedTags);
                               Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutPage()));
                             },
                             child: Container(
