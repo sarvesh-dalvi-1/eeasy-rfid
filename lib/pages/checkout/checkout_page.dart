@@ -10,6 +10,7 @@ import 'package:eeasy_rfid/util/data.dart';
 import 'package:eeasy_rfid/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/app_state_provider.dart';
@@ -136,6 +137,9 @@ class CheckoutPage extends StatelessWidget {
     String respMess = '';
 
     var resp = await RfidAPICollection.getUserSettings();
+
+    var box = await Hive.openBox('logs');
+    await box.add('${DateTime.now()} : User settings : ${jsonEncode(resp.body)}');
 
     if(resp.statusCode != 200) {
       return {

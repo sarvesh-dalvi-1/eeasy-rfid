@@ -21,6 +21,7 @@ class SettingsLogsPage extends StatelessWidget {
                 return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: future.data!.map((e) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5),
                       child: Text(e),
