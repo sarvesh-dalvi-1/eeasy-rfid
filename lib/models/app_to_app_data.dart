@@ -27,11 +27,14 @@ class AppToAppData {
   final String surcharge;
   final String payByMerchantOrderNumber;
   final String payByOrderNumber;
+  final String commChannel;
+  final String myUuid;
+  final String hostPort;
 
-  AppToAppData({required this.connectionTimeout, required this.transactionTimeout, required this.settlementTimeout, required this.trace, required this.vendorID, required this.productID, required this.driverType, required this.driverLoc, required this.tid, required this.mid, required this.ptID, required this.serialNumber, required this.portNum, required this.baudRate, required this.dcc, required this.apacsFlag, required this.sLicense, required this.posTraceLog, required this.ecrReceiptNum, required this.messageNum, required this.reportType, required this.rrn, required this.approvalCode, required this.voucherNumber, required this.surcharge, required this.payByMerchantOrderNumber, required this.payByOrderNumber});
+  AppToAppData({required this.connectionTimeout, required this.transactionTimeout, required this.settlementTimeout, required this.trace, required this.vendorID, required this.productID, required this.driverType, required this.driverLoc, required this.tid, required this.mid, required this.ptID, required this.serialNumber, required this.portNum, required this.baudRate, required this.dcc, required this.apacsFlag, required this.sLicense, required this.posTraceLog, required this.ecrReceiptNum, required this.messageNum, required this.reportType, required this.rrn, required this.approvalCode, required this.voucherNumber, required this.surcharge, required this.payByMerchantOrderNumber, required this.payByOrderNumber, required this.commChannel, required this.hostPort, required this.myUuid});
 
   static AppToAppData fromMap(Map<String, dynamic> obj) {
-    return AppToAppData(connectionTimeout: obj['connection_timeout'] ?? '320', transactionTimeout: obj['transaction_timeout'] ?? '320', settlementTimeout: obj['settlement_timeout'] ?? '320', trace: obj['trace'] ?? '', vendorID: obj['vendor_id'] ?? '', productID: obj['product_id'] ?? '', driverType: obj['driver_type'] ?? '', driverLoc: obj['driver_location'] ?? '', tid: obj['tid'] ?? '', mid: obj['mid'] ?? '', ptID: obj['pt_id'] ?? '', serialNumber: obj['device_serial_number'] ?? '', portNum: obj['port_num'] ?? '', baudRate: obj['baud_rate'] ?? '', dcc: obj['dcc_enable'] ?? '', apacsFlag: obj['apacs_flag'] ?? '', sLicense: obj['s_license'] ?? '', posTraceLog: obj['pos_trace_log'] ?? '', ecrReceiptNum: obj['ecrrcpt_num'] ?? '', messageNum: obj['mess_num'] ?? '', reportType: obj['report_type'] ?? '', rrn: obj['rrn'] ?? '', approvalCode: obj['approval_code'] ?? '', voucherNumber: obj['voucher_nun'] ?? '', surcharge: obj['surcharge'] ?? '', payByMerchantOrderNumber: obj['payby_merchant_orderno'] ?? '', payByOrderNumber: obj['payby_orderno'] ?? '');
+    return AppToAppData(connectionTimeout: obj['connection_timeout'] ?? '320', transactionTimeout: obj['transaction_timeout'] ?? '320', settlementTimeout: obj['settlement_timeout'] ?? '320', trace: obj['trace'] ?? '', vendorID: obj['vendor_id'] ?? '', productID: obj['product_id'] ?? '', driverType: obj['driver_type'] ?? '', driverLoc: obj['driver_location'] ?? '', tid: obj['tid'] ?? '', mid: obj['mid'] ?? '', ptID: obj['pt_id'] ?? '', serialNumber: obj['device_serial_number'] ?? '', portNum: obj['port_num'] ?? '', baudRate: obj['baud_rate'] ?? '', dcc: obj['dcc_enable'] ?? '', apacsFlag: obj['apacs_flag'] ?? '', sLicense: obj['s_license'] ?? '', posTraceLog: obj['pos_trace_log'] ?? '', ecrReceiptNum: obj['ecrrcpt_num'] ?? '', messageNum: obj['mess_num'] ?? '', reportType: obj['report_type'] ?? '', rrn: obj['rrn'] ?? '', approvalCode: obj['approval_code'] ?? '', voucherNumber: obj['voucher_nun'] ?? '', surcharge: obj['surcharge'] ?? '', payByMerchantOrderNumber: obj['payby_merchant_orderno'] ?? '', payByOrderNumber: obj['payby_orderno'] ?? '', commChannel: obj['comm_channel'], hostPort: obj['host_port'], myUuid: obj['my_uuid']);
   }
 
   toMap() {
@@ -62,7 +65,10 @@ class AppToAppData {
       'voucher_no' : voucherNumber,
       'surcharge' : surcharge,
       'payby_merchant_orderno' : payByMerchantOrderNumber,
-      'payby_orderno' : payByOrderNumber
+      'payby_orderno' : payByOrderNumber,
+      'comm_channel' : commChannel,
+      'my_uuid' : myUuid,
+      'host_port' : hostPort
     };
   }
 

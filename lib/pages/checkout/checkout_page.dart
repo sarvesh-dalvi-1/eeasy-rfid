@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/app_state_provider.dart';
+import '../../providers/rfid_read_provider.dart';
 import '../../widgets/bottombar.dart';
 
 class CheckoutPage extends StatelessWidget {
@@ -31,16 +32,16 @@ class CheckoutPage extends StatelessWidget {
       totalAmountDisplay += double.parse(product.discountedPrice);
     }
 
-    Future.delayed(const Duration(seconds: 1)).then((value) {
-      paymentProcess(context, false, totalAmount).then((res) {
-        if(res['error'] == true) {
-          Fluttertoast.showToast(msg: 'Error : ${res['code']} : ${res['message']}');
-        }
-        else {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentSuccessfulPage()));
-        }
-      });
+    Future.delayed(const Duration(seconds: 1)).then((value) async {
+      var resp = await Provider.of<AppStateProvider>(context, listen: false).paymentProcess1(context, false, totalAmount.toInt(), 4);
+      if(resp['error'] == true) {
+        Fluttertoast.showToast(msg: 'Error : ${resp['code']} : ${resp['message']}');
+      }
+      else {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentSuccessfulPage()));
+      }
     });
+
 
 
 

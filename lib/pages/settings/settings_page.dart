@@ -4,6 +4,8 @@ import 'package:eeasy_rfid/pages/settings/settings_logs_page.dart';
 import 'package:eeasy_rfid/pages/settings/providers/settings_logs_provider.dart';
 import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 import '../../widgets/appbar.dart';
@@ -14,18 +16,48 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    TextEditingController ipTextController = TextEditingController();
+
     return Scaffold(
-      body: Column(
-        children: [
-          const CAppbar(),
-          Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                    children: List.generate(4, (index) => AntennaSwitch(antennaNo: index + 1))
+      body: FutureBuilder<String>(
+        future: getIPFromLocalDB(),
+        builder: (context, future) {
+          if(future.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          else {
+
+            ipTextController.text = future.data ?? '';
+
+            return Column(
+              children: [
+                const CAppbar(),
+                Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                          children: List.generate(4, (index) => AntennaSwitch(antennaNo: index + 1))
+                      ),
+                    )
                 ),
-              )
-          ),
-        ],
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Row(
+                    children: [
+                      const Text('IP Address : '),
+                      Expanded(child: TextField(controller: ipTextController)),
+                      const SizedBox(width: 30),
+                      ElevatedButton(onPressed: () async {
+                        var box = await Hive.openBox('config');
+                        await box.put('ip', ipTextController.text);
+                        Fluttertoast.showToast(msg: 'Saved');
+                      }, child: const Text('Save'))
+                    ],
+                  ),
+                )
+              ],
+            );
+          }
+        }
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -35,6 +67,17 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
+
+  Future<String> getIPFromLocalDB() async {
+    var box = await Hive.openBox('config');
+    if(box.values.isNotEmpty) {
+      return box.get('ip');
+    }
+    else {
+      return '';
+    }
+  }
+
 }
 
 

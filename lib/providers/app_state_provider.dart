@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:eeasy_rfid/pages/start_shopping/start_shopping_page.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
+import 'package:eeasy_rfid/util/streams.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../Models/user_settings.dart';
 import '../api_collection/eeasy_rfid_api.dart';
 import '../util/constants.dart';
+import 'door_status_provider.dart';
 
 class AppStateProvider extends ChangeNotifier {
 
@@ -19,37 +22,9 @@ class AppStateProvider extends ChangeNotifier {
   bool isRecordingOn = true;
 
   setIsRecordingOn(bool value, BuildContext context) {
-    Fluttertoast.showToast(msg: 'Recording set to : $value');
     if(isRecordingOn == true) {
       Provider.of<RfidReadProvider>(context, listen: false).populateFinalRecTags();
-      Navigator.push(context, CupertinoPageRoute(builder: (_) => Material(
-          child: SafeArea(
-              child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Start shopping', style: TextStyle(fontSize: 16)),
-                        const SizedBox(height: 15),
-                        ElevatedButton(
-                            onPressed: () {
-                              paymentProcess(context, false, 10000, 3).then((value) {
-                                if(value['error'] == true) {
-                                  Fluttertoast.showToast(msg: value['message']);
-                                }
-                                else {
-                                  Constants.methodChannel.invokeMethod('openDoor', {}).then((value) {
-                                    Navigator.pop(context);
-                                  });
-                                }
-                              });
-                            },
-                            child: const Text('Proceed')
-                        )
-                      ]
-                  )
-              )
-          )
-      ))
+      Navigator.push(context, CupertinoPageRoute(builder: (_) => const StartShoppingPage())
     );
     }
     isRecordingOn = value;
@@ -62,7 +37,7 @@ class AppStateProvider extends ChangeNotifier {
   }
 
 
-  Future<Map<String, dynamic>> paymentProcess(BuildContext context, bool txnStatusToggle, int totalAmount, int transType) async {
+  Future<Map<String, dynamic>> paymentProcess(BuildContext context, bool txnStatusToggle, int totalAmount, int transType, {bool notifyInitAuthSuccess = false}) async {
 
     String respCode = '';
     String respMess = '';
@@ -90,6 +65,9 @@ class AppStateProvider extends ChangeNotifier {
     respCode = initAuthResp['VFI_RespCode'];
     respMess = initAuthResp['VFI_RespMess'];
     if(initAuthResp['VFI_RespCode'] == '000' || initAuthResp['VFI_RespCode'] == '00') {
+      if(notifyInitAuthSuccess == true) {
+        AppStreams.initAuthStatusStreamController.sink.add(0);
+      }
       await Future.delayed(const Duration(seconds: 2));
       var getAuthResp = await Constants.methodChannel.invokeMethod('vfiGetAuth', temp);
       await Fluttertoast.showToast(msg: 'Get Auth : ${getAuthResp['VFI_RespCode']} : ${getAuthResp['VFI_RespMess']}');
@@ -117,6 +95,12 @@ class AppStateProvider extends ChangeNotifier {
             'message' : respMess
           };
         }
+      }
+    }
+
+    if(notifyInitAuthSuccess == true) {
+      if(initAuthResp['VFI_RespCode'] != '000' && initAuthResp['VFI_RespCode'] != '00') {
+        AppStreams.initAuthStatusStreamController.sink.add(1);
       }
     }
 
@@ -153,8 +137,22 @@ class AppStateProvider extends ChangeNotifier {
     temp.addAll({'cash_amount' : '0'});
 
     await Future.delayed(const Duration(seconds: 2));
-    var getAuthResp = await Constants.methodChannel.invokeMethod('vfiGetAuth', temp);
-    await Fluttertoast.showToast(msg: 'Get Auth : ${getAuthResp['VFI_RespCode']} : ${getAuthResp['VFI_RespMess']}');
+    var initAuthResp = await Constants.methodChannel.invokeMethod('vfiInitAuth', temp);
+    await Fluttertoast.showToast(msg: 'Init Auth : ${initAuthResp['VFI_RespCode']} : ${initAuthResp['VFI_RespMess']}', toastLength: Toast.LENGTH_LONG);
+    respCode = initAuthResp['VFI_RespCode'];
+    respMess = initAuthResp['VFI_RespMess'];
+    if(initAuthResp['VFI_RespCode'] == '000' || initAuthResp['VFI_RespCode'] == '00') {
+      await Future.delayed(const Duration(seconds: 2));
+      var getAuthResp = await Constants.methodChannel.invokeMethod('vfiGetAuth', temp);
+      await Fluttertoast.showToast(msg: 'Get Auth : ${getAuthResp['VFI_RespCode']} : ${getAuthResp['VFI_RespMess']}');
+      if(getAuthResp['VFI_RespCode'] == '000' || getAuthResp['VFI_RespCode'] == '00') {
+        return {
+          'error' : false,
+          'code' : respCode,
+          'message' : respMess
+        };
+      }
+    }
 
     return {
       'error' : true,

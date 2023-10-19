@@ -8,8 +8,10 @@ import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 import com.MFG.eeasyMagnati.EcrToPos
-import com.MFG.eeasyusbserial.ConfigData
-import com.MFG.eeasyusbserial.ConfigLoader
+import com.MFG.eeasyUtility.ConfigData
+import com.MFG.eeasyUtility.ConfigLoader
+import com.MFG.eeasyusbserial.DoorConfigData
+import com.MFG.eeasyusbserial.DoorConfigLoader
 import com.eeasy.doorlibrary.EcrToArudino
 import com.example.rfid_mvp_final.PublicData
 import com.rfidread.Enumeration.eReadType
@@ -34,7 +36,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
     private val EVENT_CHANNEL = "com.example.eeasy_rfid/event"
     private  val TAGS_EVENT_CHANNEL = "com.example.eeasy_rfid/event/tags"
 
-    val connParam = "192.168.1.116:9090"
+    var connParam = "192.168.1.117:9090"
 
     var TerminalInterface : EcrToPos = EcrToPos()
 
@@ -80,7 +82,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL)
             .setMethodCallHandler { call, result ->
                 if (call.method.equals("connectTCP")) {
-                    result.success(connectTcp())
+                    result.success(call.argument<String>("ip")?.let { connectTcp(it) })
                 }
                 else if(call.method.equals("connectUSB")) {
                     result.success(connectUSB(this))
@@ -90,6 +92,13 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                 }
                 else if (call.method == "vfiInit") {
                     VFIInit(call)
+                    val temp: MutableMap<String, String> = HashMap()
+                    temp["VFI_RespMess"] = TerminalInterface.vfI_RespMess
+                    temp["VFI_RespCode"] = TerminalInterface.VFI_RespCode
+                    result.success(temp)
+                }
+                else if(call.method == "vfiDoorInit") {
+                    VFIDoorInit(call)
                     val temp: MutableMap<String, String> = HashMap()
                     temp["VFI_RespMess"] = TerminalInterface.vfI_RespMess
                     temp["VFI_RespCode"] = TerminalInterface.VFI_RespCode
@@ -206,13 +215,28 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     result.success(temp)
                 }
                 else if(call.method == "openDoor") {
+                    val activity : MainActivity = this
+                    EcrToArudino.SetContext(activity)
+                    EcrToArudino.InitDLL()
                     result.success(EcrToArudino.OpenDoor())
                 }
                 else if(call.method == "closeDoor") {
+                    val activity : MainActivity = this
+                    EcrToArudino.SetContext(activity)
+                    EcrToArudino.InitDLL()
                     result.success(EcrToArudino.CloseDoor())
                 }
                 else if(call.method == "doorStatus") {
-                    result.success(EcrToArudino.DoorSensorStatus())
+                    val activity : MainActivity = this
+                    EcrToArudino.SetContext(activity)
+                    EcrToArudino.InitDLL()
+                    EcrToArudino.DoorSensorStatus()
+                    //val toast2 = Toast.makeText(applicationContext, , Toast.LENGTH_SHORT)
+                    //toast2.setGravity(Gravity.CENTER, 0, 0)
+                    val toast1 = Toast.makeText(applicationContext, "Door Native state  : ${EcrToArudino.strStatus}", Toast.LENGTH_SHORT)
+                    toast1.setGravity(Gravity.CENTER, 0, 0)
+                    toast1.show()
+                    result.success(EcrToArudino.strStatus == "ALREADY OPENED\n")
                 }
                 else {
                     result.notImplemented()
@@ -222,9 +246,9 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
     }
 
 
-    private fun connectTcp() : Boolean {
+    private fun connectTcp(ip : String) : Boolean {
         //if(count == 0) {
-            val rt = Rfid_Tcp_Init(this)
+            val rt = Rfid_Tcp_Init(this, ip)
             eventSink!!.success(rt)
             //count ++
         //}
@@ -236,12 +260,17 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
 
 
-    fun Rfid_Tcp_Init(log: IAsynchronousMessage): Boolean {
+    fun Rfid_Tcp_Init(log: IAsynchronousMessage, ip: String): Boolean {
 
+        if(ip != "") {
+            connParam = ip
+        }
+        val toast1 = Toast.makeText(applicationContext, "IP  : ${connParam}", Toast.LENGTH_SHORT)
+        toast1.setGravity(Gravity.CENTER, 0, 0)
+        toast1.show()
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         var rt: Boolean = true
-        val connParam = "192.168.1.116:9090"
         runOnUiThread{eventSink!!.success("Rfid_Tcp_Init Start")}
         val cName: String = Frame_0001_01().javaClass.name
         println("NAME : $cName")
@@ -305,11 +334,45 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         return x
     }
 
-    fun VFIInit(methodCall: MethodCall) {
+
+    fun VFIDoorInit(methodCall: MethodCall) {
         try {
             val activity : MainActivity = this
+            EcrToArudino.SetContext(activity)
+            EcrToArudino.InitDLL()
+            val toast1 = Toast.makeText(applicationContext, "Door init call native  : ${methodCall.argument<String>("strPTid")}", Toast.LENGTH_SHORT)
+            toast1.setGravity(Gravity.CENTER, 0, 0)
+            toast1.show()
+            DoorConfigData.InitConfigData(this, "", "", "320", "320", "320", "", "", "", "", "","","","","","","", "")
+            DoorConfigLoader.strMacKey = methodCall.argument("strMacKey")
+            DoorConfigLoader.strPTid = methodCall.argument("strPTid")
+            DoorConfigLoader.strSN = methodCall.argument("strSN")
+            DoorConfigLoader.iTrace = (methodCall.argument<String>("iTrace")!!).toInt()
+            DoorConfigLoader.strPosTraceLog = ""
+            DoorConfigLoader.iPOSAckTimeOut = (methodCall.argument<String>("iPOSAckTimeOut")!!).toInt()
+            DoorConfigLoader.iTimeOut = (methodCall.argument<String>("iTimeOut")!!).toInt()
+            DoorConfigLoader.iUploadTimeOut = (methodCall.argument<String>("iUploadTimeOut")!!).toInt()
+            DoorConfigLoader.sVendorId = (methodCall.argument<String>("sVendorId"))
+            DoorConfigLoader.sProductId = (methodCall.argument<String>("sProductId"))
+            DoorConfigLoader.sDriverType = (methodCall.argument<String>("sDriverType"))
+            DoorConfigLoader.sPortNum =  (methodCall.argument<String>("sPortNum"))
+            DoorConfigLoader.sPosBaudRate = (methodCall.argument<String>("sPosBaudRate"))
+            DoorConfigLoader.sDCCFlag = (methodCall.argument<String>("sDCCFlag"))
+            DoorConfigLoader.sApacs = (methodCall.argument<String>("sApacs"))
+            DoorConfigLoader.sDriverLoc = (methodCall.argument("sDriverLoc"))
+            DoorConfigLoader.SaveConfig()
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+
+    fun VFIInit(methodCall: MethodCall) {
+        try {
+            Log.d("TAG", methodCall.arguments.toString())
+            val activity : MainActivity = this
             TerminalInterface.SetContext(activity)
-            ConfigData.InitConfigData(this, "", "", "320", "320", "320", "", "", "", "", "","","","","","","", "")
+            ConfigData.InitConfigData(this, "", "", "320", "320", "320", "", "", "", "", "","","","","","","", "",     "" , "" , "")
             ConfigLoader.strMacKey = ""
             ConfigLoader.strPTid = methodCall.argument("pt_id")
             ConfigLoader.strSN = methodCall.argument("device_serial_number")
@@ -326,6 +389,12 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
             ConfigLoader.sDCCFlag = (methodCall.argument<String>("dcc_enable"))
             ConfigLoader.sApacs = (methodCall.argument<String>("apacs_flag"))
             ConfigLoader.sDriverLoc = (methodCall.argument("driver_location"))
+
+            ConfigLoader.sCommChannel = (methodCall.argument<String>("comm_channel"))
+            ConfigLoader.MY_UUID = (methodCall.argument<String>("my_uuid"))
+            ConfigLoader.sHostPort = (methodCall.argument<String>("host_port"))
+            ConfigLoader.strTid = methodCall.argument<String>("tid")
+
             ConfigLoader.SaveConfig()
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
@@ -334,6 +403,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
 
     fun VFIInitAuth(methodCall: MethodCall) {
+        Log.d("TAG", methodCall.arguments.toString())
         TerminalInterface.setVFI_TransType(methodCall.argument<String>("transaction_type")!!)
         TerminalInterface.setVFI_Amount(methodCall.argument<String>("transaction_amount")!!)
         TerminalInterface.setVFI_CashAmount(methodCall.argument<String>("cash_amount")!!)
@@ -341,6 +411,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         TerminalInterface.setVFI_ECRRcptNum(methodCall.argument<String>("ecrrcpt_num")!!)
         TerminalInterface.setVFI_MessNum(methodCall.argument("mess_num")!!)
         TerminalInterface.setVFI_ReportType(methodCall.argument("report_type")!!)
+        Log.d("TAG", ConfigLoader.sDriverType)
         TerminalInterface.VFI_InitTransaction()
         /// SetOutputDataValues(bReturn)
     }

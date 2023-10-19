@@ -1,3 +1,5 @@
+import 'package:eeasy_rfid/models/rfid_data.dart';
+
 import 'app_to_app_data.dart';
 
 class UserSettingsModel {
@@ -17,13 +19,14 @@ class UserSettingsModel {
   final String? mid;
   final int? isPayByLinkAllowed;
   final AppToAppData? appToAppData;
+  final RFIDData? rfidData;
   final int screenType;         /// 1 : Barcode    |    2 : Touchscreen
 
 
-  const UserSettingsModel({required this.userId, required this.timezoneId, required this.decimalPlaces, required this.timezone, required this.tid, required this.mid, required this.countryCode, required this.currencyId, required this.currencyName, required this.defaultReturnWindow, required this.dstOffset, required this.gmtOffset, required this.rawOffset, required this.appToAppData, required this.isPayByLinkAllowed, required this.screenType});
+  const UserSettingsModel({required this.userId, required this.timezoneId, required this.decimalPlaces, required this.timezone, required this.tid, required this.mid, required this.countryCode, required this.currencyId, required this.currencyName, required this.defaultReturnWindow, required this.dstOffset, required this.gmtOffset, required this.rawOffset, required this.appToAppData, required this.isPayByLinkAllowed, required this.screenType, required this.rfidData});
 
-  static fromMap(Map<String, dynamic> json) {
-    return UserSettingsModel(userId: json['user_id'], timezoneId: json['timezone_id'], timezone: json['timezone'], countryCode: json['country_code'], gmtOffset: json['gmt_offset'], dstOffset: json['dst_offset'], rawOffset: json['raw_offset'], currencyId: json['currency_id'], currencyName: json['currency_name'], decimalPlaces: json['decimal_places_value'], defaultReturnWindow: json['default_return_window'], tid: json['tid'], mid: json['mid'], appToAppData: AppToAppData.fromMap(json['machine_data'] ?? {}), isPayByLinkAllowed: json['allow_paybylink'] ?? 0, screenType: json['screen_type']);
+  static UserSettingsModel fromMap(Map<String, dynamic> json) {
+    return UserSettingsModel(userId: json['user_id'], timezoneId: json['timezone_id'], timezone: json['timezone'], countryCode: json['country_code'], gmtOffset: json['gmt_offset'], dstOffset: json['dst_offset'], rawOffset: json['raw_offset'], currencyId: json['currency_id'], currencyName: json['currency_name'], decimalPlaces: json['decimal_places_value'], defaultReturnWindow: json['default_return_window'], tid: json['tid'], mid: json['mid'], appToAppData: AppToAppData.fromMap(json['machine_data'] ?? {}), isPayByLinkAllowed: json['allow_paybylink'] ?? 0, screenType: json['screen_type'], rfidData: RFIDData.fromMap(json['rfid_device_data'] ?? {}));
   }
 
   toMap() {

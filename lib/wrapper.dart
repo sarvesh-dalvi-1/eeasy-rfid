@@ -7,22 +7,33 @@ import 'package:eeasy_rfid/util/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Wrapper extends StatelessWidget {
+class Wrapper extends StatefulWidget {
   const Wrapper({Key? key}) : super(key: key);
+
+  @override
+  State<Wrapper> createState() => _WrapperState();
+}
+
+class _WrapperState extends State<Wrapper> {
+
+  bool pseudoInit = true;
 
   @override
   Widget build(BuildContext context) {
 
-    Constants.rfidLogsEventChannel.receiveBroadcastStream().listen((event) {
-      print('Logs : $event');
-    });
-    Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
-      print('Tags : $event');
-    });
+    if(pseudoInit == true) {
+      Constants.rfidLogsEventChannel.receiveBroadcastStream().listen((event) {
+        print('Logs : $event');
+      });
+      Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
+        print('Tags : $event');
+      });
 
-    Provider.of<RfidInitProvider>(context, listen: false).connectTcp().then((val) {
-      Provider.of<SettingsProvider>(context, listen: false).setInitValues(context);
-    });
+      Provider.of<RfidInitProvider>(context, listen: false).connectTcp().then((val) {
+        Provider.of<SettingsProvider>(context, listen: false).setInitValues(context);
+      });
+      pseudoInit = false;
+    }
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,

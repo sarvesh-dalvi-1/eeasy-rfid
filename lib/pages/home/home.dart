@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eeasy_rfid/pages/home/widgets/empty_cart_widget.dart';
 import 'package:eeasy_rfid/pages/home/widgets/final_amount_widget.dart';
 import 'package:eeasy_rfid/pages/home/widgets/product_card.dart';
@@ -5,38 +7,57 @@ import 'package:eeasy_rfid/pages/home/widgets/products_selection_confirm.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/door_status_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
+import 'package:eeasy_rfid/util/constants.dart';
 import 'package:eeasy_rfid/widgets/appbar.dart';
 import 'package:eeasy_rfid/widgets/primary_button.dart';
 import 'package:eeasy_rfid/widgets/secondary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
+import '../../Models/user_settings.dart';
+import '../../api_collection/eeasy_rfid_api.dart';
 import '../../models/product.dart';
 import '../../providers/checkout_provider.dart';
 import '../../widgets/bottombar.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  bool liveDoorStatus = false;
+  bool liveDoorStatusOld = false;
+
+  bool pseudoInit = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    Provider.of<DoorStatusProvider>(context, listen: false).init();
-    Provider.of<RfidReadProvider>(context, listen: false).init(context);
-
-    DoorStatusProvider prov = DoorStatusProvider();
-
-    prov.addListener(() {
-      if(Provider.of<DoorStatusProvider>(context, listen: false).isDoorOpenOld != Provider.of<DoorStatusProvider>(context, listen: false).isDoorOpen && (Provider.of<DoorStatusProvider>(context, listen: false).isDoorOpen == false)) {
-        Fluttertoast.showToast(msg: 'Door close detected');
-        double amount = 0;
-        for(Product product in Provider.of<CheckoutProvider>(context, listen: false).products) {
-          amount += (double.parse(product.discountedPrice) * 100).round();
+    if(pseudoInit == true) {
+      Provider.of<RfidReadProvider>(context, listen: false).init(context);
+      initDoorCall(context);
+      Provider.of<DoorStatusProvider>(context, listen: false).doorCloseDetectedStream.stream.asBroadcastStream().listen((event) async {
+        if(event == 1) {
+          Fluttertoast.showToast(msg: 'Door close detected');
+          await Constants.methodChannel.invokeMethod('closeDoor', {});
+          Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = false;
+          await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved);
+          showDialog(context: context, builder: (_) => const ProductsSelectionConfirmWidget());
         }
-        Provider.of<AppStateProvider>(context, listen: false).paymentProcess1(context, false, amount.toInt(), 5);
-      }
-    });
+      });
+      pseudoInit = false;
+    }
 
     return SafeArea(
       child: Material(
@@ -69,7 +90,60 @@ class HomePage extends StatelessWidget {
                     ),
                     Expanded(
                       flex: 3,
-                      child: Consumer<RfidReadProvider>(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(!(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn), context);
+                                  },
+                                  style: ElevatedButton.styleFrom(fixedSize: Size(constraints.constrainWidth() * 0.75, constraints.constrainHeight() * 0.4), foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
+                                  child: const Text('SETUP', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white))
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 20,
+                                child: SizedBox(
+                                  width: constraints.constrainWidth() - 40,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                              var resp = await Constants.methodChannel.invokeMethod('openDoor', {});
+                                              Fluttertoast.showToast(msg: 'Open Door resp : $resp');
+                                              Future.delayed(const Duration(seconds: 2), () {
+                                                Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
+                                              });
+                                          },
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                                          child: const Text('Open Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        flex: 1,
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            var resp = await Constants.methodChannel.invokeMethod('closeDoor', {});
+                                            Fluttertoast.showToast(msg: 'Close Door resp : $resp');
+                                          },
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                                          child: const Text('Close Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          );
+                        }
+                      )/*Consumer<RfidReadProvider>(
                         builder: (context, provider, child) {
                           return SingleChildScrollView(
                             child: Column(
@@ -90,39 +164,46 @@ class HomePage extends StatelessWidget {
                                 Column(
                                   children: Provider.of<RfidReadProvider>(context).tagsRemoved.map((e) => Text(e)).toList(),
                                 ),
-                                /*provider.listOfList.isNotEmpty ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('List 1 : '), ...provider.listOfList[0].map((e) => Text(e)).toList(),
-                                  ],
-                                ) : const SizedBox(),
-                                const SizedBox(height: 30),
-                                provider.listOfList.length >= 2 ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('List 2 : '), ...provider.listOfList[1].map((e) => Text(e)).toList(),
-                                  ],
-                                ) : const SizedBox(),
-                                const SizedBox(height: 30),
-                                provider.listOfList.length == 3 ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('List 3 : '), ...provider.listOfList[2].map((e) => Text(e)).toList(),
-                                  ],
-                                ) : const SizedBox(), */
                               ],
                             )
                           );
                         }
-                      ),
+                      ), */
                     )
                   ],
                 )
             ),
-            CBottomBar(hasPrimary: true, primaryText: 'Continue', onPrimaryTap: () => showDialog(context: context, builder: (_) => const ProductsSelectionConfirmWidget()))
+            //CBottomBar()
           ],
         ),
       ),
     );
+  }
+
+  initDoorCall(BuildContext context) async {
+
+    var resp = await RfidAPICollection.getUserSettingsRFID();
+
+    if(resp.statusCode != 200) {
+      return {
+        'error' : true,
+        'code' : 0,
+        'message' : 'Unable to fetch user settings'
+      };
+    }
+
+    Provider.of<AppStateProvider>(context, listen: false).userSettings = UserSettingsModel.fromMap(jsonDecode(resp.body)['data']);
+
+    Fluttertoast.showToast(msg: jsonEncode(Provider.of<AppStateProvider>(context, listen: false).userSettings!.rfidData!.toMap() as Map<String, String>));
+
+    var box = await Hive.openBox('logs');
+    box.add('${DateTime.now()} : ${jsonEncode(Provider.of<AppStateProvider>(context, listen: false).userSettings!.rfidData!.toMap() as Map<String, String>)}');
+
+    //Provider.of<AppStateProvider>(context, listen: false).userSettings!.rfidData?.toMap() as Map<String, String>
+
+    var initResp = await Constants.methodChannel.invokeMethod('vfiDoorInit', Provider.of<AppStateProvider>(context, listen: false).userSettings!.rfidData?.toMap() as Map<String, String>);
+
+    Fluttertoast.showToast(msg: 'Init door done');
+
   }
 }

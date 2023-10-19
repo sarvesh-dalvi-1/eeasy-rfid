@@ -1,11 +1,14 @@
 import 'package:eeasy_rfid/pages/settings/settings_page.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
+import 'package:eeasy_rfid/util/constants.dart';
 import 'package:eeasy_rfid/util/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../models/product.dart';
+import '../providers/door_status_provider.dart';
 import 'clock.dart';
 
 class CAppbar extends StatelessWidget {
@@ -27,7 +30,7 @@ class CAppbar extends StatelessWidget {
           Image.asset('assets/eeasy_logo.png', height: 40),
           const Expanded(child: SizedBox()),
           const ClockWidget(),
-          hasSettingsButton ? const SizedBox(width: 20) : const SizedBox(),
+          hasSettingsButton ? const SizedBox(width: 30) : const SizedBox(),
           hasSettingsButton ? InkWell(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
@@ -35,22 +38,32 @@ class CAppbar extends StatelessWidget {
               child: const Icon(Icons.settings)
           ) : const SizedBox(),
           const SizedBox(width: 30),
-          hasInverseButton ? InkWell(
+          /*hasInverseButton ? InkWell(
               onTap: () {
                 Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(!(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn), context);
               },
               child: Icon(Icons.record_voice_over_rounded, color: Provider.of<AppStateProvider>(context).isRecordingOn ? AppTheme.baseColor : Colors.grey)
           ) : const SizedBox(),
-          hasInverseButton ? InkWell(
-              onTap: () {
-                double amount = 0;
-                for(Product product in Provider.of<CheckoutProvider>(context, listen: false).products) {
-                  amount += (double.parse(product.discountedPrice) * 100).round();
-                }
-                Provider.of<AppStateProvider>(context, listen: false).paymentProcess1(context, false, amount.toInt(), 5);
+          const SizedBox(width: 30), */
+          /*hasInverseButton ? InkWell(
+              onTap: () async {
+                var resp = await Constants.methodChannel.invokeMethod('openDoor', {});
+                Fluttertoast.showToast(msg: 'Open Door resp : $resp');
+                Future.delayed(const Duration(seconds: 2), () {
+                  Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
+                });
               },
-              child: Icon(Icons.exit_to_app)
+              child: const Icon(Icons.open_in_new)
           ) : const SizedBox(),
+          const SizedBox(width: 30),
+          hasInverseButton ? InkWell(
+              onTap: () async {
+                var resp = await Constants.methodChannel.invokeMethod('closeDoor', {});
+                Fluttertoast.showToast(msg: 'Close Door resp : $resp');
+              },
+              child: const Icon(Icons.open_in_new_off)
+          ) : const SizedBox(),
+          const SizedBox(width: 30), */
         ],
       ),
     );

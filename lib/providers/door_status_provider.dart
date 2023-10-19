@@ -2,21 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../util/constants.dart';
 
 class DoorStatusProvider extends ChangeNotifier {
 
+  bool safeToCallDoorStatusCheck = false;
+
   bool isDoorOpenOld = false;
   bool isDoorOpen = false;
 
-  init() {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
+  StreamController<int> doorCloseDetectedStream = StreamController();
+
+  checkDoorStatus() async {
       var x = await Constants.methodChannel.invokeMethod('doorStatus', {});
+      Fluttertoast.showToast(msg: 'Live door status : $x');
       isDoorOpenOld = isDoorOpen;
       isDoorOpen = x;
-      notifyListeners();
-    });
+      if((isDoorOpenOld != isDoorOpen) && (isDoorOpen == false)) {
+        doorCloseDetectedStream.sink.add(1);
+      }
   }
 
 }
