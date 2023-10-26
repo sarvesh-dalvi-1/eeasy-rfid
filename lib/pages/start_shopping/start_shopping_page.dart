@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:eeasy_rfid/pages/home/home.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lottie/lottie.dart';
@@ -20,21 +24,37 @@ class _StartShoppingPageState extends State<StartShoppingPage> {
 
   int state = 0;   /// 0 -> Start shopping button   1 -> Loading    2 -> Animation
 
+  late StreamSubscription<int> subscription;
+
   @override
   void initState() {
-    /*AppStreams.initAuthStatusStreamController.stream.asBroadcastStream().listen((event) {
-      if(event == 1 && state == 1) {
-        setState(() {
-          state = 0;
-        });
-      }
-      if(event == 0 && state == 1) {
-        setState(() {
-          state = 2;
-        });
-      }
-    }); */
+    subscription = AppStreams.initAuthStatusStream.listen(_fun);
     super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    _cancelSubscription();
+    super.dispose();
+  }
+
+
+  _fun(event) {
+    if(event == 1 && state == 1) {
+      setState(() {
+        state = 0;
+      });
+    }
+    if(event == 0 && state == 1) {
+      setState(() {
+        state = 2;
+      });
+    }
+  }
+
+  _cancelSubscription() async {
+    await subscription.cancel();
   }
 
   @override
@@ -51,20 +71,22 @@ class _StartShoppingPageState extends State<StartShoppingPage> {
                         child: state != 2 ? ElevatedButton(
                             onPressed: state == 0 ? () {
                               setState(() { state = 1; });
-                             Provider.of<AppStateProvider>(context, listen: false).paymentProcess(context, false, 10000, 3, notifyInitAuthSuccess: true).then((value) {
-                                if(value['error'] == true) {
-                                  Fluttertoast.showToast(msg: value['message']);
-                                }
-                                else {
-                                  Fluttertoast.showToast(msg: 'Pre Auth Resp : ${value['error']} : ${value['code']}');
-                                  Constants.methodChannel.invokeMethod('openDoor', {}).then((value) {
-                                    Fluttertoast.showToast(msg: 'Open Door resp : $value');
-                                    Navigator.pop(context);
-                                    Future.delayed(const Duration(seconds: 4), () {
-                                      Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
+                              Future.delayed(const Duration(seconds: 1)).then((value) {
+                                Provider.of<AppStateProvider>(context, listen: false).paymentProcess(context, false, 10000, 3, notifyInitAuthSuccess: true).then((value) {
+                                  if(value['error'] == true) {
+                                    Fluttertoast.showToast(msg: value['message']);
+                                  }
+                                  else {
+                                    Fluttertoast.showToast(msg: 'Pre Auth Resp : ${value['error']} : ${value['code']}');
+                                    Constants.methodChannel.invokeMethod('openDoor', {}).then((value) {
+                                      Fluttertoast.showToast(msg: 'Open Door resp : $value');
+                                      Navigator.push(context, CupertinoPageRoute(builder: (_) => const HomePage()));
+                                      Future.delayed(const Duration(seconds: 4), () {
+                                        Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
+                                      });
                                     });
-                                  });
-                                }
+                                  }
+                                });
                               });
                             } : () { },
                             style: ElevatedButton.styleFrom(fixedSize: Size(MediaQuery.of(context).size.width * 0.3, MediaQuery.of(context).size.height * 0.35), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),

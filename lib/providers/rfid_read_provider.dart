@@ -4,7 +4,7 @@ import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/providers/door_status_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:eeasy_rfid/util/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +22,11 @@ class RfidReadProvider extends ChangeNotifier {
 
   int tagsScanned = 0;
 
-  init(BuildContext context) {
+  int count = 0;
+
+  init() {
+
+    count = 0;
 
     Constants.rfidReaderEventChannel.receiveBroadcastStream().listen((event) {
       if (((event as String).length == 24) && (!tempTags.contains(event))) {
@@ -68,14 +72,12 @@ class RfidReadProvider extends ChangeNotifier {
 
       tagsRemoved = temp.toList();
 
-      Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(tagsRemoved);
-
-      if(Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck == true) {
-        Provider.of<DoorStatusProvider>(context, listen: false).checkDoorStatus();
+      if((Provider.of<DoorStatusProvider>(Constants.navigatorKey.currentContext!, listen: false).safeToCallDoorStatusCheck == true)) {
+        Provider.of<DoorStatusProvider>(Constants.navigatorKey.currentContext!, listen: false).checkDoorStatus();
       }
 
 
-      if(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn) {
+      if(Provider.of<AppStateProvider>(Constants.navigatorKey.currentContext!, listen: false).isRecordingOn) {
         finalRecordedTags = recordedTags.toList();
       }
 
@@ -83,8 +85,11 @@ class RfidReadProvider extends ChangeNotifier {
 
       tempTags = [];
       finalList = [];
+
+      count ++;
     });
   }
+
 
 
   populateFinalRecTags() {

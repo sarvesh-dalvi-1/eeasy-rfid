@@ -1,16 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:eeasy_rfid/pages/checkout/checkout_page.dart';
 import 'package:eeasy_rfid/pages/home/widgets/empty_cart_widget.dart';
 import 'package:eeasy_rfid/pages/home/widgets/final_amount_widget.dart';
 import 'package:eeasy_rfid/pages/home/widgets/product_card.dart';
-import 'package:eeasy_rfid/pages/home/widgets/products_selection_confirm.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/door_status_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
 import 'package:eeasy_rfid/util/constants.dart';
+import 'package:eeasy_rfid/util/streams.dart';
 import 'package:eeasy_rfid/widgets/appbar.dart';
-import 'package:eeasy_rfid/widgets/primary_button.dart';
-import 'package:eeasy_rfid/widgets/secondary_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
@@ -18,9 +19,7 @@ import 'package:provider/provider.dart';
 
 import '../../Models/user_settings.dart';
 import '../../api_collection/eeasy_rfid_api.dart';
-import '../../models/product.dart';
 import '../../providers/checkout_provider.dart';
-import '../../widgets/bottombar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -36,28 +35,50 @@ class _HomePageState extends State<HomePage> {
 
   bool pseudoInit = true;
 
+  late StreamSubscription<int> doorCloseDetectStreamSubscription;
+
+
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _cancelSubscription();
+    super.dispose();
+  }
+
+  _cancelSubscription() async {
+    await doorCloseDetectStreamSubscription.cancel();
+  }
+
+  _fun(event) async {
+    if(event == 1) {
+      Fluttertoast.showToast(msg: 'Door close detected');
+      await Constants.methodChannel.invokeMethod('closeDoor', {});
+      Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = false;
+      await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved);
+      /**Provider.of<RfidReadProvider>(context, listen: false).finalRecordedTags = Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved.toList();
+      Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved = [];
+      Provider.of<RfidReadProvider>(context, listen: false).recordedTags = []; */
+      //showDialog(context: context, builder: (_) => const ProductsSelectionConfirmWidget());
+      await Constants.methodChannel.invokeMethod('stopTagsRead', {});
+      Navigator.pushReplacement(context, CupertinoPageRoute(builder: (_) => const CheckoutPage()));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
 
     if(pseudoInit == true) {
-      Provider.of<RfidReadProvider>(context, listen: false).init(context);
-      initDoorCall(context);
-      Provider.of<DoorStatusProvider>(context, listen: false).doorCloseDetectedStream.stream.asBroadcastStream().listen((event) async {
-        if(event == 1) {
-          Fluttertoast.showToast(msg: 'Door close detected');
-          await Constants.methodChannel.invokeMethod('closeDoor', {});
-          Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = false;
-          await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved);
-          showDialog(context: context, builder: (_) => const ProductsSelectionConfirmWidget());
-        }
-      });
+      if(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn == true) {
+        Provider.of<RfidReadProvider>(context, listen: false).init();
+        initDoorCall(context);
+      }
+      else {
+        Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved = [];
+      }
+      doorCloseDetectStreamSubscription = AppStreams.doorCloseDetectedStream.listen(_fun);
+
       pseudoInit = false;
     }
+
 
     return SafeArea(
       child: Material(
@@ -96,12 +117,22 @@ class _HomePageState extends State<HomePage> {
                             alignment: Alignment.center,
                             children: [
                               Center(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(!(Provider.of<AppStateProvider>(context, listen: false).isRecordingOn), context);
-                                  },
-                                  style: ElevatedButton.styleFrom(fixedSize: Size(constraints.constrainWidth() * 0.75, constraints.constrainHeight() * 0.4), foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
-                                  child: const Text('SETUP', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white))
+                                child: Consumer<AppStateProvider>(
+                                  builder: (context, prov, child) {
+                                    return prov.isRecordingOn ? ElevatedButton(
+                                      onPressed: () {
+                                        Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(false, context);
+                                      },
+                                      style: ElevatedButton.styleFrom(fixedSize: Size(constraints.constrainWidth() * 0.75, constraints.constrainHeight() * 0.4), foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
+                                      child: const Text('SETUP', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white))
+                                    ) : const Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('Fridge Door is Open', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                                        Text('Remove products and close door to proceed', style: TextStyle(fontSize: 14))
+                                      ],
+                                    );
+                                  }
                                 ),
                               ),
                               Positioned(

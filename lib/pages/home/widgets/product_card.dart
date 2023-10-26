@@ -24,13 +24,13 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   void initState() {
-    if(Data.epcProductMap.containsKey(widget.epc)) {
-      product = Data.epcProductMap[widget.epc]!;
+    if(AppData.epcProductMap.containsKey(widget.epc)) {
+      product = AppData.epcProductMap[widget.epc]!;
     }
     else{
       RfidAPICollection.getProductFromEPC(widget.epc).then((value) {
         if(value.data != null) {
-          Data.epcProductMap.addAll({widget.epc : value.data!});
+          AppData.epcProductMap.addAll({widget.epc : value.data!});
           if(mounted) {
             setState(() { product = value.data; });
           }

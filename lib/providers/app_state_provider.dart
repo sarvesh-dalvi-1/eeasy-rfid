@@ -4,7 +4,6 @@ import 'package:eeasy_rfid/pages/start_shopping/start_shopping_page.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
 import 'package:eeasy_rfid/util/streams.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
@@ -24,8 +23,7 @@ class AppStateProvider extends ChangeNotifier {
   setIsRecordingOn(bool value, BuildContext context) {
     if(isRecordingOn == true) {
       Provider.of<RfidReadProvider>(context, listen: false).populateFinalRecTags();
-      Navigator.push(context, CupertinoPageRoute(builder: (_) => const StartShoppingPage())
-    );
+      Navigator.pushReplacement(context, CupertinoPageRoute(builder: (_) => const StartShoppingPage()));
     }
     isRecordingOn = value;
     notifyListeners();
@@ -59,6 +57,7 @@ class AppStateProvider extends ChangeNotifier {
     Map<String, String> temp = Provider.of<AppStateProvider>(context, listen: false).userSettings!.appToAppData?.toMap();
     temp.addAll({'transaction_type' : transType.toString()});
     temp.addAll({'transaction_amount' : totalAmount.toString()});
+    temp.addAll({'payment_step' : "1"});
     temp.addAll({'cash_amount' : '0'});
     var initAuthResp = await Constants.methodChannel.invokeMethod('vfiInitAuth', temp);
     await Fluttertoast.showToast(msg: 'Init Auth : ${initAuthResp['VFI_RespCode']} : ${initAuthResp['VFI_RespMess']}', toastLength: Toast.LENGTH_LONG);
@@ -135,6 +134,7 @@ class AppStateProvider extends ChangeNotifier {
     temp.addAll({'transaction_type' : transType.toString()});
     temp.addAll({'transaction_amount' : totalAmount.toString()});
     temp.addAll({'cash_amount' : '0'});
+    temp.addAll({'payment_step' : "2"});
 
     await Future.delayed(const Duration(seconds: 2));
     var initAuthResp = await Constants.methodChannel.invokeMethod('vfiInitAuth', temp);

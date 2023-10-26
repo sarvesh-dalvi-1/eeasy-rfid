@@ -226,6 +226,9 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     EcrToArudino.InitDLL()
                     result.success(EcrToArudino.CloseDoor())
                 }
+                else if(call.method == "stopTagsRead") {
+                    result.success(stopTagsRead())
+                }
                 else if(call.method == "doorStatus") {
                     val activity : MainActivity = this
                     EcrToArudino.SetContext(activity)
@@ -235,7 +238,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     //toast2.setGravity(Gravity.CENTER, 0, 0)
                     val toast1 = Toast.makeText(applicationContext, "Door Native state  : ${EcrToArudino.strStatus}", Toast.LENGTH_SHORT)
                     toast1.setGravity(Gravity.CENTER, 0, 0)
-                    toast1.show()
+                    //toast1.show()
                     result.success(EcrToArudino.strStatus == "ALREADY OPENED\n")
                 }
                 else {
@@ -288,6 +291,10 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
 
     private fun readTags(): Int {
         return Tag6C.GetEPC(connParam, enabledAntennas, eReadType.Inventory)
+    }
+
+    private fun stopTagsRead() : Int {
+        return RFIDReader._Config.Stop(connParam)
     }
 
     private fun setAntenna(selectedAntennas : List<Int>) : Int {
@@ -401,6 +408,10 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         }
     }
 
+    lateinit var tAmt : String
+
+    lateinit var tNo : String
+
 
     fun VFIInitAuth(methodCall: MethodCall) {
         Log.d("TAG", methodCall.arguments.toString())
@@ -412,6 +423,23 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         TerminalInterface.setVFI_MessNum(methodCall.argument("mess_num")!!)
         TerminalInterface.setVFI_ReportType(methodCall.argument("report_type")!!)
         Log.d("TAG", ConfigLoader.sDriverType)
+
+        if(methodCall.argument<String>("payment_step")!! == "2") {
+
+            TerminalInterface.setVFI_OriginalRcptNum(methodCall.argument("mess_num")!!)
+
+            TerminalInterface.setVFI_PreauthComplAmount(methodCall.argument("transaction_amount"))
+            TerminalInterface.setVFI_Amount(tAmt)
+            TerminalInterface.setVFI_OriginalRcptNum(tNo)
+
+            TerminalInterface.setVFI_TID(methodCall.argument<String>("tid")!!)
+            TerminalInterface.setVFI_ECRRcptNum(methodCall.argument<String>("ecrrcpt_num")!!)
+        }
+        else {
+            TerminalInterface.setVFI_PreauthComplAmount("0.00")
+            TerminalInterface.setVFI_Amount(methodCall.argument<String>("transaction_amount")!!)
+        }
+
         TerminalInterface.VFI_InitTransaction()
         /// SetOutputDataValues(bReturn)
     }
@@ -421,7 +449,6 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         val activity : MainActivity = this
         TerminalInterface.SetContext(activity)
         TerminalInterface.setVFI_TransType(methodCall.argument<String>("transaction_type")!!)
-        TerminalInterface.setVFI_Amount(methodCall.argument<String>("transaction_amount")!!)
         TerminalInterface.setVFI_CashAmount(methodCall.argument<String>("cash_amount")!!)
         TerminalInterface.setVFI_TID(methodCall.argument<String>("tid")!!)
         TerminalInterface.setVFI_ECRRcptNum(methodCall.argument<String>("ecrrcpt_num")!!)
@@ -432,7 +459,28 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
         TerminalInterface.setVFI_AdPaySurcharge(methodCall.argument<String>("surcharge")!!)
         TerminalInterface.setVFI_PayByMerchantOrderNo(methodCall.argument<String>("payby_merchant_orderno")!!)
         TerminalInterface.setVFI_PayByOrderNo(methodCall.argument<String>("payby_orderno")!!)
+
+        if(methodCall.argument<String>("payment_step")!! == "2") {
+
+            TerminalInterface.setVFI_OriginalRcptNum(methodCall.argument("mess_num")!!)
+
+            TerminalInterface.setVFI_Amount(tAmt)
+            TerminalInterface.setVFI_OriginalRcptNum(tNo)
+
+            TerminalInterface.setVFI_PreauthComplAmount(methodCall.argument("transaction_amount"))
+
+            TerminalInterface.setVFI_TID(methodCall.argument<String>("tid")!!)
+            TerminalInterface.setVFI_ECRRcptNum(methodCall.argument<String>("ecrrcpt_num")!!)
+        }
+        else {
+            TerminalInterface.setVFI_PreauthComplAmount("0.00")
+            TerminalInterface.setVFI_Amount(methodCall.argument<String>("transaction_amount")!!)
+        }
+
+
         TerminalInterface.VFI_GetAuth()
+        tAmt = TerminalInterface.getVFI_Amount()
+        tNo = TerminalInterface.getVFI_MessNum()
     }
 
 

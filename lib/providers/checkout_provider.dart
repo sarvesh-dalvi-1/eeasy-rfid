@@ -8,21 +8,23 @@ import '../util/data.dart';
 class CheckoutProvider extends ChangeNotifier {
   List<Product> products = [];
 
-  populateCheckoutProductsFromTags(List<String> tags) async {
+  Future<int> populateCheckoutProductsFromTags(List<String> tags) async {
     products = [];
+    Fluttertoast.showToast(msg: 'Checkout Products : ${tags.length}');
     for (String tag in tags) {
-      if (Data.epcProductMap.containsKey(tag)) {
-        products.add(Data.epcProductMap[tag]!);
+      if (AppData.epcProductMap.containsKey(tag)) {
+        products.add(AppData.epcProductMap[tag]!);
       } else {
         var resp = await RfidAPICollection.getProductFromEPC(tag);
         if (resp.data != null) {
-          Data.epcProductMap.addAll({tag: resp.data!});
+          AppData.epcProductMap.addAll({tag: resp.data!});
           products.add(resp.data!);
         } else {
           ///Fluttertoast.showToast(msg: '$tag : ${resp.statusCode} : ${resp.reasonPhrase}');
         }
       }
     }
-    notifyListeners();
+    return 1;
+    ///notifyListeners();
   }
 }

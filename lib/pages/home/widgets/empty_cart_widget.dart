@@ -13,7 +13,7 @@ class EmptyCardWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset('assets/cart.png', height: 70, width: 70),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           Text(isRecordingOn ? 'Place items in fridge to record tags' : 'Pick items from fridge', style: const TextStyle(color: Color(0xff000C38), fontWeight: FontWeight.w600, fontSize: 18))
         ],
       ),
