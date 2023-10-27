@@ -52,12 +52,9 @@ class _HomePageState extends State<HomePage> {
     if(event == 1) {
       Fluttertoast.showToast(msg: 'Door close detected');
       await Constants.methodChannel.invokeMethod('closeDoor', {});
+      await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(await Provider.of<RfidReadProvider>(context, listen: false).singlePopulate());
       Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = false;
-      await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved);
-      /**Provider.of<RfidReadProvider>(context, listen: false).finalRecordedTags = Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved.toList();
-      Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved = [];
-      Provider.of<RfidReadProvider>(context, listen: false).recordedTags = []; */
-      //showDialog(context: context, builder: (_) => const ProductsSelectionConfirmWidget());
+      Provider.of<RfidReadProvider>(context, listen: false).reset();
       await Constants.methodChannel.invokeMethod('stopTagsRead', {});
       Navigator.pushReplacement(context, CupertinoPageRoute(builder: (_) => const CheckoutPage()));
     }

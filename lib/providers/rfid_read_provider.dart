@@ -19,9 +19,6 @@ class RfidReadProvider extends ChangeNotifier {
   List<String> tagsRemoved = [];     /// This will store all the tags that are removed after recording
   List<String> finalRecordedTags = [];    /// Store the final recorded data here
 
-
-  int tagsScanned = 0;
-
   int count = 0;
 
   init() {
@@ -40,61 +37,98 @@ class RfidReadProvider extends ChangeNotifier {
 
     Timer.periodic(const Duration(seconds: 2), (_) {
 
-      tagsScanned = tempTags.length;
-      //Fluttertoast.showToast(msg: 'Temp tags : ${tempTags.length}');
-      listOfList.add(tempTags);
-      if(listOfList.length > 3) {
-        listOfList.removeAt(0);
-      }
+      if(Provider.of<AppStateProvider>(Constants.navigatorKey.currentContext!, listen: false).isRecordingOn) {
 
-      for(int i=0;i<listOfList.length; i++) {
-        for(int j=0; j<listOfList[i].length; j++) {
-          if(!finalList.contains(listOfList[i][j])) {
-            finalList.add(listOfList[i][j]);
+        listOfList.add(tempTags);
+        if(listOfList.length > 3) {
+          listOfList.removeAt(0);
+        }
+
+        for(int i=0;i<listOfList.length; i++) {
+          for(int j=0; j<listOfList[i].length; j++) {
+            if(!finalList.contains(listOfList[i][j])) {
+              finalList.add(listOfList[i][j]);
+            }
           }
         }
-      }
-      if(!listEquals(finalList..sort(), recordedTags..sort())) {
-        //Fluttertoast.showToast(msg: 'List updated !!!');
-        recordedTags = finalList.toList();
-        //notifyListeners();
-      }
-
-      //tagsRemoved = [];
-
-      List<String> temp = [];
-
-      for(int i=0;i<finalRecordedTags.length;i++) {
-        if(!recordedTags.contains(finalRecordedTags[i])) {
-          temp.add(finalRecordedTags[i]);
+        if(!listEquals(finalList..sort(), recordedTags..sort())) {
+          recordedTags = finalList.toList();
         }
+
+        finalRecordedTags = recordedTags.toList();
+
+        notifyListeners();
+
+        tempTags = [];
+        finalList = [];
+
       }
 
-      tagsRemoved = temp.toList();
-
-      if((Provider.of<DoorStatusProvider>(Constants.navigatorKey.currentContext!, listen: false).safeToCallDoorStatusCheck == true)) {
+      if((Provider.of<DoorStatusProvider>(Constants.navigatorKey.currentContext!, listen: false).safeToCallDoorStatusCheck == true) && count % 4 == 0) {
         Provider.of<DoorStatusProvider>(Constants.navigatorKey.currentContext!, listen: false).checkDoorStatus();
       }
 
-
-      if(Provider.of<AppStateProvider>(Constants.navigatorKey.currentContext!, listen: false).isRecordingOn) {
-        finalRecordedTags = recordedTags.toList();
-      }
-
-      notifyListeners();
-
-      tempTags = [];
-      finalList = [];
-
       count ++;
+
     });
   }
 
 
 
+  Future<List<String>> singlePopulate() async {
+    /// Checks the current fridge state on call and will return the list of tags removed from fridge
+
+    listOfList = [];
+    finalList = [];
+    recordedTags = [];
+
+    tempTags = [];
+    await Future.delayed(const Duration(milliseconds: 500));
+    listOfList.add(tempTags);
+    tempTags = [];
+    await Future.delayed(const Duration(milliseconds: 500));
+    listOfList.add(tempTags);
+    tempTags = [];
+    await Future.delayed(const Duration(milliseconds: 500));
+    listOfList.add(tempTags);
+
+    for(int i=0;i<listOfList.length; i++) {
+      for(int j=0; j<listOfList[i].length; j++) {
+        if(!finalList.contains(listOfList[i][j])) {
+          finalList.add(listOfList[i][j]);
+        }
+      }
+    }
+
+    recordedTags = finalList.toList();
+
+    List<String> temp = [];
+
+    for(int i=0;i<finalRecordedTags.length;i++) {
+      if(!recordedTags.contains(finalRecordedTags[i])) {
+        temp.add(finalRecordedTags[i]);
+      }
+    }
+
+    tagsRemoved = temp.toList();
+
+    return tagsRemoved;
+
+  }
+
+
   populateFinalRecTags() {
     finalRecordedTags = recordedTags.toList();
     notifyListeners();
+  }
+
+
+  reset() {
+    finalRecordedTags = recordedTags.toList();
+    listOfList = [];
+    tagsRemoved = [];
+    count = 0;
+    finalList = [];
   }
 
 }

@@ -1,4 +1,5 @@
 import 'package:eeasy_rfid/pages/start_shopping/start_shopping_page.dart';
+import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
 import 'package:eeasy_rfid/util/theme.dart';
 import 'package:eeasy_rfid/wrapper.dart';
@@ -35,6 +36,7 @@ class PaymentSuccessfulPage extends StatelessWidget {
             CBottomBar(hasSecondary: true, secondaryText: 'Done', onSecondaryTap: () async {
                 await Constants.methodChannel.invokeMethod('readTags');
                 Provider.of<RfidReadProvider>(context, listen: false).tagsRemoved = [];
+                Provider.of<CheckoutProvider>(context, listen: false).products = [];
                 Navigator.pushReplacement(context, CupertinoPageRoute(builder: (_) => const StartShoppingPage()));
             })
           ],
