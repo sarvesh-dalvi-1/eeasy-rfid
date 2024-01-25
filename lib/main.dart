@@ -3,9 +3,11 @@ import 'dart:ui';
 
 import 'package:eeasy_rfid/Models/user_settings.dart';
 import 'package:eeasy_rfid/models/session.dart';
+import 'package:eeasy_rfid/pages/checkout/checkout_page.dart';
 import 'package:eeasy_rfid/pages/home/home.dart';
 import 'package:eeasy_rfid/pages/settings/providers/settings_logs_provider.dart';
 import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
+import 'package:eeasy_rfid/pages/start_shopping/start_shopping_page.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/providers/door_status_provider.dart';
@@ -78,7 +80,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const TempPage()//const HomePage()
+      home: const TempPage()
     );
   }
 }

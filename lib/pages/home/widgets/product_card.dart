@@ -54,8 +54,9 @@ class _ProductCardState extends State<ProductCard> {
 class LoadedProductCard extends StatelessWidget {
 
   final Product product;
+  final bool isMagnified;
 
-  const LoadedProductCard({Key? key, required this.product}) : super(key: key);
+  const LoadedProductCard({Key? key, required this.product, this.isMagnified = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -67,12 +68,12 @@ class LoadedProductCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(40),
-            child: Image.network(product.imageUri, width: 40, height: 40, fit: BoxFit.cover),
+            child: Image.network(product.imageUri, width: isMagnified ? 55 : 40, height: isMagnified ? 55 : 40, fit: BoxFit.cover),
           ),
           const SizedBox(width: 10),
-          Text(product.name, style: const TextStyle(color: Color(0xff344054))),
+          Text(product.name, style: TextStyle(color: const Color(0xff344054), fontSize: isMagnified ? 18 : 14)),
           const Expanded(child: SizedBox()),
-          Text('AED ${double.parse(product.discountedPrice).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600))
+          Text('AED ${double.parse(product.discountedPrice).toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: isMagnified ? 18 : 14))
         ],
       ),
     );

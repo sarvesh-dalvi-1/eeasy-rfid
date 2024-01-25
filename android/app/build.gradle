@@ -53,6 +53,7 @@ android {
         targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        archivesBaseName = "$applicationId v$versionName ${System.currentTimeMillis()}"
     }
 
     buildTypes {
@@ -71,7 +72,7 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation(name: "ReaderAPI", ext:"jar")
-    implementation(name: "eeasy-DoorLib-General-1.0-202310131227-debug", ext: "aar")
+    implementation(name: "eeasy-DoorLib-General-1.0-202310310901-debug", ext: "aar")
     implementation(name: "MAG-SerialBTWifiLib-General-1.3-202310191043-debug", ext:"aar")
     implementation(name: "usbSerialForAndroid-debug", ext:"aar")
 }

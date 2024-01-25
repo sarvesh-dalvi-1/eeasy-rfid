@@ -18,7 +18,7 @@ class DoorStatusProvider extends ChangeNotifier {
 
   checkDoorStatus() async {
       var x = await Constants.methodChannel.invokeMethod('doorStatus', {});
-      //Fluttertoast.showToast(msg: 'Live door status : $x');
+      Fluttertoast.showToast(msg: 'Live door status : $x');
       isDoorOpenOld = isDoorOpen;
       isDoorOpen = x;
       if((isDoorOpenOld != isDoorOpen) && (isDoorOpen == false)) {

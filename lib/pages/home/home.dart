@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage> {
     if(event == 1) {
       Fluttertoast.showToast(msg: 'Door close detected');
       await Constants.methodChannel.invokeMethod('closeDoor', {});
+      await Constants.methodChannel.invokeMethod('readTags', {});
       await Provider.of<CheckoutProvider>(context, listen: false).populateCheckoutProductsFromTags(await Provider.of<RfidReadProvider>(context, listen: false).singlePopulate());
       Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = false;
       Provider.of<RfidReadProvider>(context, listen: false).reset();
@@ -83,122 +84,109 @@ class _HomePageState extends State<HomePage> {
           children: [
             const CAppbar(hasSettingsButton: true, hasInverseButton: true),
             Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 7,
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          Consumer<RfidReadProvider>(
-                            builder: (context, provider, child) {
-                              return Provider.of<AppStateProvider>(context).isRecordingOn ? (provider.recordedTags.isEmpty ? const EmptyCardWidget(isRecordingOn: true) : ListView(
-                                  children: provider.recordedTags.map((e) => ProductCard(epc: e, key: ValueKey(e)) as Widget).toList()..add(const SizedBox(height: 50) as Widget)
-                              )) : (provider.tagsRemoved.isEmpty ? const EmptyCardWidget(isRecordingOn: false) : ListView(
-                              children: provider.tagsRemoved.map((e) => ProductCard(epc: e, key: ValueKey(e)) as Widget).toList()..add(const SizedBox(height: 50) as Widget)
-                              ));
-                            },
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: FinalAmountWidget(),
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return Stack(
-                            alignment: Alignment.center,
+                child: Consumer<AppStateProvider>(
+                  builder: (context, appProv, child) {
+                    return appProv.isRecordingOn ? Row(
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: Stack(
+                            alignment: Alignment.bottomCenter,
                             children: [
-                              Center(
-                                child: Consumer<AppStateProvider>(
-                                  builder: (context, prov, child) {
-                                    return prov.isRecordingOn ? ElevatedButton(
-                                      onPressed: () {
-                                        Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(false, context);
-                                      },
-                                      style: ElevatedButton.styleFrom(fixedSize: Size(constraints.constrainWidth() * 0.75, constraints.constrainHeight() * 0.4), foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
-                                      child: const Text('SETUP', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white))
-                                    ) : const Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('Fridge Door is Open', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                                        Text('Remove products and close door to proceed', style: TextStyle(fontSize: 14))
-                                      ],
-                                    );
-                                  }
-                                ),
+                              Consumer<RfidReadProvider>(
+                                builder: (context, provider, child) {
+                                  return provider.recordedTags.isEmpty ? const EmptyCardWidget(isRecordingOn: true) : ListView(
+                                      children: provider.recordedTags.map((e) => ProductCard(epc: e, key: ValueKey(e)) as Widget).toList()..add(const SizedBox(height: 50) as Widget)
+                                  );
+                                },
                               ),
-                              Positioned(
-                                bottom: 20,
-                                child: SizedBox(
-                                  width: constraints.constrainWidth() - 40,
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: ElevatedButton(
-                                          onPressed: () async {
-                                              var resp = await Constants.methodChannel.invokeMethod('openDoor', {});
-                                              Fluttertoast.showToast(msg: 'Open Door resp : $resp');
-                                              Future.delayed(const Duration(seconds: 2), () {
-                                                Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
-                                              });
-                                          },
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-                                          child: const Text('Open Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Expanded(
-                                        flex: 1,
-                                        child: ElevatedButton(
-                                          onPressed: () async {
-                                            var resp = await Constants.methodChannel.invokeMethod('closeDoor', {});
-                                            Fluttertoast.showToast(msg: 'Close Door resp : $resp');
-                                          },
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-                                          child: const Text('Close Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                child: FinalAmountWidget(),
                               )
                             ],
-                          );
-                        }
-                      )/*Consumer<RfidReadProvider>(
-                        builder: (context, provider, child) {
-                          return SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                Text('Live scan : ${provider.tagsScanned}'),
-                                const SizedBox(height: 30),
-                                Text('Recorded Tags'),
-                                Column(
-                                  children: Provider.of<RfidReadProvider>(context).recordedTags.map((e) => Text(e)).toList(),
-                                ),
-                                const SizedBox(height: 30),
-                                Text('Final recorded tags'),
-                                Column(
-                                  children: Provider.of<RfidReadProvider>(context).finalRecordedTags.map((e) => Text(e)).toList(),
-                                ),
-                                const SizedBox(height: 30),
-                                Text('Tags removed'),
-                                Column(
-                                  children: Provider.of<RfidReadProvider>(context).tagsRemoved.map((e) => Text(e)).toList(),
-                                ),
-                              ],
-                            )
-                          );
-                        }
-                      ), */
-                    )
-                  ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Center(
+                                    child: Consumer<AppStateProvider>(
+                                      builder: (context, prov, child) {
+                                        return prov.isRecordingOn ? ElevatedButton(
+                                          onPressed: () async {
+                                            await Constants.methodChannel.invokeMethod('stopTagsRead', {});
+                                            Provider.of<AppStateProvider>(context, listen: false).setIsRecordingOn(false, context);
+                                          },
+                                          style: ElevatedButton.styleFrom(fixedSize: Size(constraints.constrainWidth() * 0.75, constraints.constrainHeight() * 0.4), foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
+                                          child: const Text('SETUP', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.white))
+                                        ) : const Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Fridge Door is Open', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                                            Text('Remove products and close door to proceed', style: TextStyle(fontSize: 14))
+                                          ],
+                                        );
+                                      }
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 20,
+                                    child: SizedBox(
+                                      width: constraints.constrainWidth() - 40,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                  var resp = await Constants.methodChannel.invokeMethod('openDoor', {});
+                                                  Fluttertoast.showToast(msg: 'Open Door resp : $resp');
+                                                  Future.delayed(const Duration(seconds: 2), () {
+                                                    Provider.of<DoorStatusProvider>(context, listen: false).safeToCallDoorStatusCheck = true;
+                                                  });
+                                              },
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                                              child: const Text('Open Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 20),
+                                          Expanded(
+                                            flex: 1,
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                var resp = await Constants.methodChannel.invokeMethod('closeDoor', {});
+                                                Fluttertoast.showToast(msg: 'Close Door resp : $resp');
+                                              },
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Colors.black.withOpacity(0.5), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                                              child: const Text('Close Door', style: TextStyle(color: Color(0xff172F5D), fontWeight: FontWeight.w500)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              );
+                            }
+                          )
+                        )
+                      ],
+                    ) : Center(
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Image.asset('assets/success.png'),
+                            const Text('Please pick the items that you would like to purchase.\nClose the door to complete transaction.', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600))
+                          ],
+                        ),
+                      )
+                    );
+                  }
                 )
             ),
             //CBottomBar()

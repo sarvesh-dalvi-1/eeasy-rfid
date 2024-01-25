@@ -238,6 +238,7 @@ open class MainActivity: IAsynchronousMessage, FlutterActivity() {
                     //toast2.setGravity(Gravity.CENTER, 0, 0)
                     val toast1 = Toast.makeText(applicationContext, "Door Native state  : ${EcrToArudino.strStatus}", Toast.LENGTH_SHORT)
                     toast1.setGravity(Gravity.CENTER, 0, 0)
+                    Log.d("DOOR_STATE", EcrToArudino.strStatus)
                     //toast1.show()
                     result.success(EcrToArudino.strStatus == "ALREADY OPENED\n")
                 }

@@ -68,10 +68,10 @@ class _StartShoppingPageState extends State<StartShoppingPage> {
                   Expanded(
                     child: Center(
                       child: Center(
-                        child: state != 2 ? ElevatedButton(
-                            onPressed: state == 0 ? () {
+                        child: state == 0 ? ElevatedButton(
+                            onPressed: () {
                               setState(() { state = 1; });
-                              Future.delayed(const Duration(seconds: 1)).then((value) {
+                              Future.delayed(const Duration(seconds: 1)).then((value) async {
                                 Provider.of<AppStateProvider>(context, listen: false).paymentProcess(context, false, 10000, 3, notifyInitAuthSuccess: true).then((value) {
                                   if(value['error'] == true) {
                                     Fluttertoast.showToast(msg: value['message']);
@@ -88,17 +88,28 @@ class _StartShoppingPageState extends State<StartShoppingPage> {
                                   }
                                 });
                               });
-                            } : () { },
+                            },
                             style: ElevatedButton.styleFrom(fixedSize: Size(MediaQuery.of(context).size.width * 0.3, MediaQuery.of(context).size.height * 0.35), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), backgroundColor: const Color(0xff172F5D)),
-                            child: state == 0 ? const Text('START SHOPPING', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)) : const CircularProgressIndicator(color: Colors.white)
-                        ) : Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Lottie.asset('assets/start_shopping.json', height: MediaQuery.of(context).size.height * 0.65, fit: BoxFit.fitHeight),
-                              const SizedBox(height: 15),
-                              const Text('Tap card to open fridge', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500))
-                            ],
+                            child: const Text('START SHOPPING', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white))
+                        ) : state == 1 ? const Center(child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 80, width: 80,
+                                child: CircularProgressIndicator()
+                            ),
+                          ],
+                        )) : Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 50.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Lottie.asset('assets/start_shopping.json', height: MediaQuery.of(context).size.height * 0.4, fit: BoxFit.cover),
+                                const SizedBox(height: 15),
+                                const Text('Tap card to open fridge', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600))
+                              ],
+                            ),
                           ),
                         ),
                       ),
