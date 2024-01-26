@@ -5,6 +5,7 @@ import 'package:eeasy_rfid/util/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
 class SettingsProvider extends ChangeNotifier {
@@ -52,6 +53,7 @@ class SettingsProvider extends ChangeNotifier {
     await Constants.methodChannel.invokeMethod('setAntenna', {"antennas" : selectedAntennas});
     await Constants.methodChannel.invokeMethod('setPower', {'powerMap' : powerMap});
     initValuesSet = true;
+    await Hive.initFlutter();
     var box = await Hive.openBox('logs');
     box.add('${DateTime.now()} : SA : $selectedAntennas ..... PM');
     notifyListeners();

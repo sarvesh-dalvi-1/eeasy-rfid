@@ -1,3 +1,4 @@
+import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
@@ -18,6 +19,7 @@ void main() async {
     ChangeNotifierProvider<RfidReadProvider>(create: (_) => RfidReadProvider()),
     ChangeNotifierProvider<AppStateProvider>(create: (_) => AppStateProvider()),
     ChangeNotifierProvider<CheckoutProvider>(create: (_) => CheckoutProvider()),
+    ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
   ], child: const MyApp()));
 }
 
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'eeasy rfid',
+        title: 'Eeasy RFID',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
