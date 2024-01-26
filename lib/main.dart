@@ -1,5 +1,3 @@
-import 'package:eeasy_rfid/pages/settings/providers/settings_logs_provider.dart';
-import 'package:eeasy_rfid/pages/settings/providers/settings_provider.dart';
 import 'package:eeasy_rfid/providers/app_state_provider.dart';
 import 'package:eeasy_rfid/providers/checkout_provider.dart';
 import 'package:eeasy_rfid/providers/rfid_read_provider.dart';
@@ -7,34 +5,20 @@ import 'package:eeasy_rfid/providers/rfid_init_provider.dart';
 import 'package:eeasy_rfid/wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
-
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-
-  await Hive.initFlutter();
-  await Hive.openBox('logs');
-
-  runApp(
-      MultiProvider(
-          providers: [
-            ChangeNotifierProvider<RfidInitProvider>(create: (_) => RfidInitProvider()),
-            ChangeNotifierProvider<RfidReadProvider>(create: (_) => RfidReadProvider()),
-            ChangeNotifierProvider<AppStateProvider>(create: (_) => AppStateProvider()),
-            ChangeNotifierProvider<CheckoutProvider>(create: (_) => CheckoutProvider()),
-            ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
-          ],
-          child: const MyApp()
-      )
-  );
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider<RfidInitProvider>(create: (_) => RfidInitProvider()),
+    ChangeNotifierProvider<RfidReadProvider>(create: (_) => RfidReadProvider()),
+    ChangeNotifierProvider<AppStateProvider>(create: (_) => AppStateProvider()),
+    ChangeNotifierProvider<CheckoutProvider>(create: (_) => CheckoutProvider()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -43,16 +27,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'eeasy rfid',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const Wrapper()
-    );
+        title: 'eeasy rfid',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const Wrapper());
   }
 }
-
-
-
