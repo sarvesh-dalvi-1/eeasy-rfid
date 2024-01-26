@@ -1,4 +1,4 @@
-package com.example.rfid_mvp_final
+package co.eeasy.fridge
 
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager

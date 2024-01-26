@@ -1,4 +1,4 @@
-package com.example.eeasy_rfid
+package co.eeasy.fridge
 
 
 import android.hardware.usb.UsbManager
@@ -13,7 +13,7 @@ import com.MFG.eeasyUtility.ConfigLoader
 import com.MFG.eeasyusbserial.DoorConfigData
 import com.MFG.eeasyusbserial.DoorConfigLoader
 import com.eeasy.doorlibrary.EcrToArudino
-import com.example.rfid_mvp_final.PublicData
+import co.eeasy.fridge.PublicData
 import com.rfidread.Enumeration.eReadType
 import com.rfidread.Interface.IAsynchronousMessage
 import com.rfidread.Models.GPI_Model

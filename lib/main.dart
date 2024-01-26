@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'eeasy rfid',
+      title: 'Eeasy Fridge',
       key: Constants.navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -108,8 +108,10 @@ class _TempPageState extends State<TempPage> {
 
   _fun() async {
     var box = await Hive.openBox('config');
-    setState(() async {
-      ipTextController.text = await box.get('ip');
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() async {
+        ipTextController.text = await box.get('ip');
+      });
     });
   }
 

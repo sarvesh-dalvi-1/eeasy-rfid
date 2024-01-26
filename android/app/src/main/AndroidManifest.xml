@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.rfid_mvp_final" xmlns:tools="http://schemas.android.com/tools">
+    package="co.eeasy.fridge" xmlns:tools="http://schemas.android.com/tools">
 
 <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -29,7 +29,7 @@
     <uses-feature android:name="android.hardware.usb.host" />
 
     <application
-        android:label="eeasy_rfid"
+        android:label="Eeasy Fridge"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         tools:targetApi="31"
